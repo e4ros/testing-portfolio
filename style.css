@@ -35,7 +35,7 @@ body{
 /* ===== shared header (left title, right vertical links) ===== */
 header{
   position:relative; height:68px; display:flex; align-items:center;
-  border-bottom:1px solid var(--line); padding-left:20px;
+  border-bottom:none;
 }
 .title{
   font-weight:600; font-size:clamp(18px,3vw,26px); text-align:left; text-decoration:none;
