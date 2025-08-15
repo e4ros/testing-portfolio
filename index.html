@@ -3,167 +3,83 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ethan — Portfolio (One‑Screen)</title>
+<title>Ethan — Portfolio Mosaic</title>
 <meta name="color-scheme" content="light dark" />
 <style>
-  /* --- Reset --- */
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;height:100%}
   img{max-width:100%;display:block}
   a{color:inherit;text-decoration:none}
   :root{
-    --bg:#ffffff; --fg:#0b0b0b; --muted:#6e6e6e; --line:#e9e9e9;
-    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Inter, Roboto, "Helvetica Neue", Arial;
-    --pad: 20px;
-    --radius: 12px;
+    --bg:#fff; --fg:#0b0b0b; --muted:#777; --line:#e0e0e0;
+    --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial;
   }
   @media (prefers-color-scheme: dark){
-    :root{--bg:#0b0b0b; --fg:#f2f2f2; --muted:#a9a9a9; --line:#242424;}
+    :root{--bg:#0b0b0b; --fg:#f2f2f2; --muted:#aaa; --line:#333;}
   }
-  body{background:var(--bg); color:var(--fg); font:400 14px/1.45 var(--sans); overflow:hidden}
-
-  /* The inner design uses a fixed "design size" and scales to fit viewport */
-  .fit-wrap{position:fixed; inset:0; display:grid; place-items:center}
-  .fit{width:1120px; height:680px; /* design canvas */ transform-origin: top left;
-       border:1px solid var(--line); border-radius:16px; background:color-mix(in oklab, var(--bg) 96%, transparent)}
-  /* Content grid: header / main / footer locked in one screen */
-  .frame{display:grid; grid-template-rows: 56px 1fr 52px; height:100%}
-
-  /* Header */
-  header{display:flex; align-items:center; justify-content:space-between; padding:0 var(--pad); border-bottom:1px solid var(--line)}
-  .brand{font-weight:600}
-  .contact a{margin-left:14px; opacity:.9}
-  .contact a:hover{opacity:1; text-decoration:underline}
-
-  /* Main: 3 panels inside one screen */
-  main{display:grid; grid-template-columns: 1.1fr 1.4fr 1fr; gap:16px; padding:16px}
-  .panel{border:1px solid var(--line); border-radius:var(--radius); padding:14px; display:grid; gap:10px; background:color-mix(in oklab, var(--bg) 98%, transparent)}
-  .panel h2{font:600 12px var(--mono); letter-spacing:.4px; color:var(--muted); text-transform:uppercase; margin:0}
-
-  /* About panel */
-  .about h3{font-size:22px; line-height:1.15; margin:2px 0 8px}
-  .about p{margin:0; color:var(--fg)}
-  .small{font:12px var(--mono); color:var(--muted)}
-
-  /* Projects panel: 2x2 always visible */
-  .grid{display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:10px; height:100%}
-  .card{border:1px solid var(--line); border-radius:10px; overflow:hidden; display:grid; grid-template-rows: 1fr auto}
-  .thumb{background:#111; display:grid; place-items:center}
-  .thumb img{width:100%; height:100%; object-fit:cover}
-  .meta{padding:8px 10px; display:flex; align-items:center; justify-content:space-between; gap:8px}
-  .title{font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .k{font:11px var(--mono); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-
-  /* Now / Links panel */
-  .rows{display:grid; gap:8px}
-  .row{display:flex; gap:8px; align-items:baseline}
-  .row .k{min-width:92px; font:11px var(--mono); color:var(--muted)}
-  .links a{display:inline-block; border:1px solid var(--line); border-radius:999px; padding:6px 10px; font:12px var(--mono); margin-right:8px}
-
-  /* Footer */
-  footer{display:flex; align-items:center; justify-content:space-between; padding:0 var(--pad); border-top:1px solid var(--line); color:var(--muted)}
-  .kbd{border:1px solid var(--line); border-radius:6px; padding:1px 6px; font:11px var(--mono)}
-
-  /* Hide overflow shadows etc. */
-  .ellipsis{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:var(--sans);
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    grid-auto-rows:1fr;
+    gap:10px;
+    padding:10px;
+    height:100vh;
+  }
+  .tile{
+    border:1px solid var(--line);
+    border-radius:6px;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    background:color-mix(in oklab, var(--bg) 96%, transparent);
+  }
+  .thumb{flex:1; background:#111}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .label{
+    padding:8px;
+    font-size:13px;
+    font-weight:600;
+    border-top:1px solid var(--line);
+  }
+  .contact{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:600;
+    font-size:14px;
+  }
 </style>
 </head>
 <body>
-<div class="fit-wrap">
-  <div class="fit">
-    <div class="frame">
+  <!-- Name tile -->
+  <div class="tile contact">Ethan Granat<br><span style="font-weight:400;font-size:12px;color:var(--muted)">Designer & Engineer</span></div>
 
-      <header>
-        <div class="brand">Ethan</div>
-        <nav class="contact">
-          <a href="mailto:hello@example.com" rel="nofollow">Email</a>
-          <a href="https://github.com/yourname" target="_blank" rel="noreferrer">GitHub</a>
-          <a href="https://instagram.com/yourname" target="_blank" rel="noreferrer">Instagram</a>
-        </nav>
-      </header>
+  <!-- Project tiles -->
+  <a href="#" class="tile">
+    <div class="thumb"><img src="project1.jpg" alt=""></div>
+    <div class="label">Microsite — On Borrowed Fabric</div>
+  </a>
+  <a href="#" class="tile">
+    <div class="thumb"><img src="project2.jpg" alt=""></div>
+    <div class="label">Composite I-beam Study</div>
+  </a>
+  <a href="#" class="tile">
+    <div class="thumb"><img src="project3.jpg" alt=""></div>
+    <div class="label">Zero-waste Workshop Kit</div>
+  </a>
+  <a href="#" class="tile">
+    <div class="thumb"><img src="project4.jpg" alt=""></div>
+    <div class="label">Minimal UI Concept</div>
+  </a>
 
-      <main>
-        <!-- About -->
-        <section class="panel about">
-          <h2>About</h2>
-          <h3>Designer / engineer focused on minimal interfaces & circular materials.</h3>
-          <p class="ellipsis">Currently in WA · available for select projects.</p>
-          <p class="small">Tools: Figma, HTML/CSS/JS, Python · Composites, DSC/DMA, injection molding.</p>
-        </section>
-
-        <!-- Projects (2×2 fixed) -->
-        <section class="panel">
-          <h2>Selected work</h2>
-          <div class="grid">
-            <article class="card">
-              <a href="#" target="_blank" rel="noreferrer">
-                <div class="thumb"><img src="project1.jpg" alt="Project 1 cover" /></div>
-                <div class="meta"><div class="title">Microsite — On Borrowed Fabric</div><div class="k">Design · 2024</div></div>
-              </a>
-            </article>
-            <article class="card">
-              <a href="#" target="_blank" rel="noreferrer">
-                <div class="thumb"><img src="project2.jpg" alt="Project 2 cover" /></div>
-                <div class="meta"><div class="title">Composite I‑beam study</div><div class="k">Materials · 2023</div></div>
-              </a>
-            </article>
-            <article class="card">
-              <a href="#" target="_blank" rel="noreferrer">
-                <div class="thumb"><img src="project3.jpg" alt="Project 3 cover" /></div>
-                <div class="meta"><div class="title">Zero‑waste workshop kit</div><div class="k">Edu · 2022</div></div>
-              </a>
-            </article>
-            <article class="card">
-              <a href="#" target="_blank" rel="noreferrer">
-                <div class="thumb"><img src="project4.jpg" alt="Project 4 cover" /></div>
-                <div class="meta"><div class="title">Minimal UI concept</div><div class="k">UI · 2025</div></div>
-              </a>
-            </article>
-          </div>
-        </section>
-
-        <!-- Now / Links -->
-        <section class="panel">
-          <h2>Now / links</h2>
-          <div class="rows">
-            <div class="row"><div class="k">Reading</div><div><a href="#" target="_blank" rel="noreferrer">The Disappearance of Rituals</a></div></div>
-            <div class="row"><div class="k">Listening</div><div><a href="#" target="_blank" rel="noreferrer">Groovy Indian Summer</a></div></div>
-            <div class="row"><div class="k">Note</div><div>Stretch daily · sunscreen · electrolytes</div></div>
-          </div>
-          <div class="links" style="margin-top:6px">
-            <a href="#" target="_blank" rel="noreferrer">Resume (PDF)</a>
-            <a href="#" target="_blank" rel="noreferrer">Now page</a>
-            <a href="#" target="_blank" rel="noreferrer">All projects</a>
-          </div>
-        </section>
-      </main>
-
-      <footer>
-        <div class="small">© <span id="y"></span> Ethan</div>
-        <div class="small">No scroll. Everything at a glance. <span class="kbd">⌘/Ctrl</span> + <span class="kbd">+</span>/<span class="kbd">−</span> also works.</div>
-      </footer>
-
-    </div>
-  </div>
-</div>
-
-<script>
-/* Fit-to-viewport scaling so NOTHING scrolls */
-function fit() {
-  const wrap = document.querySelector('.fit-wrap');
-  const el = document.querySelector('.fit');
-  const ww = wrap.clientWidth, wh = wrap.clientHeight;
-  const cw = el.offsetWidth, ch = el.offsetHeight;
-  const s = Math.min(ww/cw, wh/ch);
-  el.style.transform = `scale(${s})`;
-}
-addEventListener('resize', fit, {passive:true});
-addEventListener('orientationchange', fit, {passive:true});
-document.addEventListener('DOMContentLoaded', ()=>{ 
-  document.getElementById('y').textContent = new Date().getFullYear();
-  fit();
-});
-</script>
+  <!-- Contact link tiles -->
+  <a href="mailto:hello@example.com" class="tile contact">Email</a>
+  <a href="#" class="tile contact">Resume</a>
+  <a href="https://github.com" class="tile contact">GitHub</a>
+  <a href="https://instagram.com" class="tile contact">Instagram</a>
 </body>
 </html>
