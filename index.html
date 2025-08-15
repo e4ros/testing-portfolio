@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ethan — Portfolio</title>
+<title>Ethan Granat — Portfolio</title>
 <meta name="color-scheme" content="light dark" />
 <style>
+  /* ===== reset / tokens ===== */
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;height:100%}
   img{max-width:100%;display:block}
@@ -16,102 +17,93 @@
     --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial;
     --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-    /* center region sizing */
+    /* center panel size (tweak these) */
     --center-w: min(1100px, 78vw);
     --center-h: min(620px, 64vh);
 
-    /* split: left text / right grid */
-    --left-w: 34%;   /* text panel width */
-    --right-w: 66%;  /* grid panel width */
-
     /* grid controls */
-    --cols: 4;
-    --rows: 2;
+    --cols: 4;          /* number of columns */
     --gap: 12px;
     --radius: 10px;
-    --tile-ratio: 4/3;
+    --tile-ratio: 4/3;  /* 1/1 for squares, 16/9 for wide */
 
     --pad: 14px;
   }
+
   @media (prefers-color-scheme: dark){
     :root{--bg:#0b0b0b; --fg:#f2f2f2; --muted:#aaa; --line:#2a2a2a;}
   }
 
   body{
     background:var(--bg); color:var(--fg); font-family:var(--sans);
-    height:100vh; overflow:hidden; display:grid; grid-template-rows:auto 1fr auto;
+    height:100vh; overflow:hidden; display:grid;
+    grid-template-rows:auto 1fr auto;
   }
 
-  /* header with centered title + right-side vertical links */
+  /* ===== header (title left) ===== */
   header{
-    position:relative; height:68px; display:grid; place-items:center; border-bottom:1px solid var(--line);
+    position:relative; height:68px; display:flex; align-items:center;
+    border-bottom:1px solid var(--line); padding-left:20px;
   }
-  .title{font-weight:600; font-size:clamp(18px,3vw,26px); text-align:center}
-  .side-links{
-    position:absolute; right:20px; top:50%; transform:translateY(-50%);
-    display:flex; flex-direction:column; gap:12px; font:14px var(--mono); text-align:right;
+  .title{
+    font-weight:600; font-size:clamp(18px,3vw,26px); text-align:left; text-decoration:none;
   }
-  .side-links a{color:var(--muted)} .side-links a:hover{color:var(--fg)}
 
-  /* center area */
+  /* ===== right-side vertical links (fixed on the right edge) ===== */
+  .side-links{
+    position:fixed; right:20px; top:50%; transform:translateY(-50%);
+    display:flex; flex-direction:column; gap:12px;
+    font:14px var(--mono); text-align:right; z-index:10;
+  }
+  .side-links a{color:var(--muted); text-decoration:none}
+  .side-links a:hover{color:var(--fg)}
+
+  /* ===== center grid panel ===== */
   main{display:grid; place-items:center; padding:10px}
   .center{
     width:var(--center-w); height:var(--center-h);
-    display:grid; grid-template-columns: var(--left-w) var(--right-w); gap:12px;
-  }
-
-  /* left: TEXT PANEL (separate from grid) */
-  .text-panel{
-    border:1px solid var(--line); border-radius:12px; padding:var(--pad);
-    display:grid; align-content:start; gap:10px;
-    background:color-mix(in oklab, var(--bg) 96%, transparent);
-    overflow:hidden;
-  }
-  .text-panel h2{margin:0; font:600 12px var(--mono); color:var(--muted); letter-spacing:.4px; text-transform:uppercase}
-  .text-panel h3{margin:0; font-weight:600; font-size:18px; line-height:1.25}
-  .text-panel p{margin:0; font-size:14px; line-height:1.5}
-  .blips{display:flex; flex-wrap:wrap; gap:8px}
-  .blip{border:1px solid var(--line); border-radius:999px; padding:4px 10px; font:12px var(--mono); color:var(--muted)}
-
-  /* right: GRID PANEL */
-  .grid-panel{
-    border:1px solid var(--line); border-radius:12px; padding:10px;
-    background:color-mix(in oklab, var(--bg) 96%, transparent);
     display:grid; grid-template-rows:auto 1fr; gap:10px;
+    border:1px solid var(--line); border-radius:12px;
+    background:color-mix(in oklab, var(--bg) 96%, transparent);
+    padding:10px;
   }
-  .grid-head{display:flex; align-items:center; justify-content:space-between; font:12px var(--mono); color:var(--muted)}
+  .grid-head{
+    display:flex; align-items:center; justify-content:space-between;
+    font:12px var(--mono); color:var(--muted);
+  }
   .grid{
-    display:grid; gap:var(--gap);
-    grid-template-columns: repeat(var(--cols), 1fr);
-    grid-auto-rows: 1fr;
+    display:grid; grid-template-columns:repeat(var(--cols),1fr); gap:var(--gap);
   }
 
   .tile{
     border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
-    display:grid; grid-template-rows: auto 1fr auto;
+    display:grid; grid-template-rows:auto 1fr auto;
     background:color-mix(in oklab, var(--bg) 98%, transparent);
   }
-  .thumb{
-    aspect-ratio: var(--tile-ratio);
-    background:
-      repeating-linear-gradient(45deg, color-mix(in oklab,var(--bg) 94%, transparent) 0 10px, transparent 10px 20px);
-    display:grid; place-items:center; color:var(--muted); font:12px var(--mono);
-  }
-  .thumb img{width:100%; height:100%; object-fit:cover}
   .meta{padding:8px var(--pad); display:grid; gap:4px}
   .t{font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .k{font:11px var(--mono); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+
+  /* shadow placeholder surface; image will override it */
+  .thumb{
+    aspect-ratio:var(--tile-ratio);
+    background:
+      repeating-linear-gradient(45deg,
+        color-mix(in oklab,var(--bg) 94%, transparent) 0 10px,
+        transparent 10px 20px);
+    display:grid; place-items:center; color:var(--muted); font:12px var(--mono);
+  }
+  .thumb img{width:100%; height:100%; object-fit:cover}
   .cta{border-top:1px solid var(--line); padding:6px var(--pad); font:12px var(--mono); color:var(--muted)}
 
+  /* ===== footer ===== */
   footer{
     height:40px; display:flex; align-items:center; justify-content:center;
     border-top:1px solid var(--line); color:var(--muted); font:12px var(--mono);
   }
 
-  /* responsive tweak */
-  @media (max-width:1000px){
-    :root{ --cols:3; }
-  }
+  /* ===== responsive ===== */
+  @media (max-width:980px){ :root{ --cols:3; } }
   @media (max-width:720px){
     :root{ --cols:2; --center-w:92vw; --center-h:66vh; }
   }
@@ -121,84 +113,73 @@
 
 <header>
   <div class="title">Ethan Granat — Portfolio</div>
-  <nav class="side-links">
-    <a href="#modeling">Modeling</a>
-    <a href="#news">News</a>
-    <a href="#projects">Projects</a>
-    <a href="#contact">Contact</a>
-  </nav>
 </header>
 
-<main>
-  <section class="center">
-    <!-- LEFT: TEXT (separate) -->
-    <aside class="text-panel" id="about">
-      <h2>Overview</h2>
-      <h3>Designer / engineer working on minimal interfaces and circular materials.</h3>
-      <p>Currently in WA; available for select collaborations. I like clean systems, readable UI, and practical material choices.</p>
-      <div class="blips">
-        <span class="blip">UI · Web</span>
-        <span class="blip">Composites</span>
-        <span class="blip">DSC/DMA</span>
-        <span class="blip">Injection Molding</span>
-      </div>
-    </aside>
+<!-- Right-side vertical links -->
+<nav class="side-links" aria-label="Site links">
+  <a href="#modeling">Modeling</a>
+  <a href="#news">News</a>
+  <a href="#projects">Projects</a>
+  <a href="about.html">About</a>
+  <a href="#contact">Contact</a>
+</nav>
 
-    <!-- RIGHT: GRID -->
-    <section class="grid-panel" id="projects">
-      <div class="grid-head">
-        <div class="k">Selected Work</div>
-        <div class="k" id="count"></div>
-      </div>
-      <div class="grid" id="grid"></div>
-    </section>
+<main>
+  <section class="center" id="projects" aria-label="Selected work">
+    <div class="grid-head">
+      <div class="k">Selected Work</div>
+      <div class="k" id="count"></div>
+    </div>
+    <div class="grid" id="grid"></div>
   </section>
 </main>
 
 <footer>© <span id="y"></span> Ethan</footer>
 
 <script>
-/* ======= DATA (edit this) ======= */
-const COLS  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cols')) || 4;
-const ROWS  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--rows')) || 2;
+/* =========================
+   EDIT YOUR PROJECTS HERE
+   ========================= */
 const PROJECTS = [
-  { title:"Microsite — On Borrowed Fabric", role:"Design · 2024", img:"project1.jpg", url:"#"},
-  { title:"Composite I-Beam Study",        role:"Materials · 2023", img:"project2.jpg", url:"#"},
-  // Add more; empty slots will show as visible placeholders.
+  // Add/modify as you like. Images are optional; empty slots will show placeholders.
+  { title:"Microsite — On Borrowed Fabric", role:"Design · 2024", img:"images/project1.jpg", url:"#"},
+  { title:"Composite I-Beam Study",        role:"Materials · 2023", img:"images/project2.jpg", url:"#"},
+  // { title:"Zero-Waste Workshop Kit",      role:"Education · 2022", img:"images/project3.jpg", url:"#"},
+  // { title:"Minimal UI Concept",           role:"UI · 2025",       img:"images/project4.jpg", url:"#"},
 ];
 
-/* ======= RENDER ======= */
-const totalSlots = COLS * ROWS;
-const items = [...PROJECTS]; // copy
-while(items.length < totalSlots){ items.push(null); } // fill with placeholders
+/* ----- GRID SETTINGS ----- */
+const COLS = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cols')) || 4;
+const ROWS = 2;                  // how many rows to show in the grid panel
+const TOTAL = COLS * ROWS;
 
-const $grid = document.getElementById('grid');
-items.slice(0, totalSlots).forEach((p, i) => {
-  const a = document.createElement(p ? 'a' : 'div');
-  a.className = 'tile';
-  if(p?.url){ a.href = p.url; a.target = '_blank'; a.rel = 'noreferrer'; }
-  a.innerHTML = `
+const items = [...PROJECTS];
+while (items.length < TOTAL) items.push(null);  // fill with placeholders
+
+const $grid  = document.getElementById('grid');
+const $count = document.getElementById('count');
+
+items.slice(0, TOTAL).forEach(p => {
+  const tag = p ? 'a' : 'div';
+  const el = document.createElement(tag);
+  el.className = 'tile';
+  if (p?.url) { el.href = p.url; el.target = '_blank'; el.rel = 'noreferrer'; }
+  el.innerHTML = `
     <div class="meta">
       <div class="t">${p?.title || 'Empty slot'}</div>
       <div class="k">${p?.role || 'Add project'}</div>
     </div>
-    <div class="thumb">
-      ${p?.img ? `<img src="${p.img}" alt="">` : '—'}
-    </div>
+    <div class="thumb">${p?.img ? `<img src="${p.img}" alt="">` : '—'}</div>
     <div class="cta">${p ? 'view →' : 'slot'}</div>
   `;
-  $grid.appendChild(a);
+  $grid.appendChild(el);
 });
 
-document.getElementById('count').textContent = PROJECTS.length + " projects";
+if ($count) $count.textContent = `${PROJECTS.length} project${PROJECTS.length===1?'':'s'}`;
 document.getElementById('y').textContent = new Date().getFullYear();
 
-/* Lock out scrolling if someone adds too much text by accident */
-function clampNoScroll(){
-  document.body.style.overflow = 'hidden';
-}
-clampNoScroll(); addEventListener('resize', clampNoScroll);
+/* Keep page non-scrolling */
+document.body.style.overflow = 'hidden';
 </script>
 </body>
 </html>
-
