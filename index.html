@@ -6,148 +6,199 @@
 <title>Ethan — Portfolio</title>
 <meta name="color-scheme" content="light dark" />
 <style>
-  /* =============== reset / tokens =============== */
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;height:100%}
   img{max-width:100%;display:block}
   a{color:inherit;text-decoration:none}
+
   :root{
-    --bg:#ffffff; --fg:#0b0b0b; --muted:#777; --line:#e7e7e7;
-    --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Inter, Roboto, "Helvetica Neue", Arial;
+    --bg:#fff; --fg:#0b0b0b; --muted:#777; --line:#e7e7e7;
+    --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial;
     --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-    /* ===== quick knobs you can tweak ===== */
-    --grid-w: min(1000px, 72vw);   /* width of the central grid area */
-    --grid-h: min(620px, 58vh);    /* height of the central grid area */
-    --grid-cols: 4;                /* number of columns */
-    --tile-ratio: 4/3;             /* tile aspect ratio */
-    --gap: 12px;                   /* space between tiles */
-    --radius: 10px;                /* tile corner radius */
-    --pad: 14px;                   /* tile inner padding */
+    /* center region sizing */
+    --center-w: min(1100px, 78vw);
+    --center-h: min(620px, 64vh);
+
+    /* split: left text / right grid */
+    --left-w: 34%;   /* text panel width */
+    --right-w: 66%;  /* grid panel width */
+
+    /* grid controls */
+    --cols: 4;
+    --rows: 2;
+    --gap: 12px;
+    --radius: 10px;
+    --tile-ratio: 4/3;
+
+    --pad: 14px;
   }
   @media (prefers-color-scheme: dark){
     :root{--bg:#0b0b0b; --fg:#f2f2f2; --muted:#aaa; --line:#2a2a2a;}
   }
+
   body{
     background:var(--bg); color:var(--fg); font-family:var(--sans);
     height:100vh; overflow:hidden; display:grid; grid-template-rows:auto 1fr auto;
   }
 
-  /* =============== header with centered title + hamburger =============== */
+  /* header with centered title + right-side vertical links */
   header{
-    position:relative; display:grid; place-items:center; height:68px;
-    border-bottom:1px solid var(--line);
+    position:relative; height:68px; display:grid; place-items:center; border-bottom:1px solid var(--line);
   }
-  .title{font-weight:600; letter-spacing:.2px}
-  .menu-btn{
-    position:absolute; right:14px; top:50%; transform:translateY(-50%);
-    border:1px solid var(--line); background:transparent; color:inherit;
-    border-radius:999px; padding:6px 10px; font:12px/1 var(--mono); cursor:pointer;
+  .title{font-weight:600; font-size:clamp(18px,3vw,26px); text-align:center}
+  .side-links{
+    position:absolute; right:20px; top:50%; transform:translateY(-50%);
+    display:flex; flex-direction:column; gap:12px; font:14px var(--mono); text-align:right;
   }
-  .menu-btn:focus-visible{outline:2px solid currentColor; outline-offset:2px}
+  .side-links a{color:var(--muted)} .side-links a:hover{color:var(--fg)}
 
-  /* =============== center stage =============== */
-  .stage{
-    display:grid; place-items:center; padding:10px;
+  /* center area */
+  main{display:grid; place-items:center; padding:10px}
+  .center{
+    width:var(--center-w); height:var(--center-h);
+    display:grid; grid-template-columns: var(--left-w) var(--right-w); gap:12px;
   }
-  .grid-wrap{
-    width:var(--grid-w); height:var(--grid-h);
-    margin:auto;
-    display:grid; grid-template-rows:auto 1fr; gap:10px;
-    border:1px solid var(--line); border-radius:16px;
+
+  /* left: TEXT PANEL (separate from grid) */
+  .text-panel{
+    border:1px solid var(--line); border-radius:12px; padding:var(--pad);
+    display:grid; align-content:start; gap:10px;
     background:color-mix(in oklab, var(--bg) 96%, transparent);
-    padding:10px;
+    overflow:hidden;
   }
-  .grid-head{
-    display:flex; align-items:center; justify-content:space-between;
-    font:12px var(--mono); color:var(--muted);
+  .text-panel h2{margin:0; font:600 12px var(--mono); color:var(--muted); letter-spacing:.4px; text-transform:uppercase}
+  .text-panel h3{margin:0; font-weight:600; font-size:18px; line-height:1.25}
+  .text-panel p{margin:0; font-size:14px; line-height:1.5}
+  .blips{display:flex; flex-wrap:wrap; gap:8px}
+  .blip{border:1px solid var(--line); border-radius:999px; padding:4px 10px; font:12px var(--mono); color:var(--muted)}
+
+  /* right: GRID PANEL */
+  .grid-panel{
+    border:1px solid var(--line); border-radius:12px; padding:10px;
+    background:color-mix(in oklab, var(--bg) 96%, transparent);
+    display:grid; grid-template-rows:auto 1fr; gap:10px;
+  }
+  .grid-head{display:flex; align-items:center; justify-content:space-between; font:12px var(--mono); color:var(--muted)}
+  .grid{
+    display:grid; gap:var(--gap);
+    grid-template-columns: repeat(var(--cols), 1fr);
+    grid-auto-rows: 1fr;
   }
 
-  .grid{
-    display:grid;
-    grid-template-columns:repeat(var(--grid-cols), 1fr);
-    grid-auto-rows:1fr;
-    gap:var(--gap);
-  }
   .tile{
-    border:1px solid var(--line); border-radius:var(--radius);
-    overflow:hidden; display:grid; grid-template-rows:auto 1fr auto;
+    border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
+    display:grid; grid-template-rows: auto 1fr auto;
     background:color-mix(in oklab, var(--bg) 98%, transparent);
   }
   .thumb{
-    aspect-ratio:var(--tile-ratio);
-    background:#111; display:grid; place-items:center; overflow:hidden;
+    aspect-ratio: var(--tile-ratio);
+    background:
+      repeating-linear-gradient(45deg, color-mix(in oklab,var(--bg) 94%, transparent) 0 10px, transparent 10px 20px);
+    display:grid; place-items:center; color:var(--muted); font:12px var(--mono);
   }
   .thumb img{width:100%; height:100%; object-fit:cover}
-  .meta{padding:var(--pad); display:grid; gap:6px}
+  .meta{padding:8px var(--pad); display:grid; gap:4px}
   .t{font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .k{font:11px var(--mono); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .cta{padding:var(--pad); border-top:1px solid var(--line); font:12px var(--mono); color:var(--muted)}
-  .tile.link{display:flex; align-items:center; justify-content:center; font-weight:600; font-size:14px}
+  .cta{border-top:1px solid var(--line); padding:6px var(--pad); font:12px var(--mono); color:var(--muted)}
 
-  /* =============== footer (tiny) =============== */
   footer{
-    height:44px; display:flex; align-items:center; justify-content:center;
+    height:40px; display:flex; align-items:center; justify-content:center;
     border-top:1px solid var(--line); color:var(--muted); font:12px var(--mono);
   }
 
-  /* =============== minimal overlay menu =============== */
-  .overlay{
-    position:fixed; inset:0; background:color-mix(in oklab, var(--bg) 85%, transparent);
-    backdrop-filter:saturate(160%) blur(4px);
-    display:none; place-items:center; z-index:10;
+  /* responsive tweak */
+  @media (max-width:1000px){
+    :root{ --cols:3; }
   }
-  .overlay[aria-hidden="false"]{display:grid}
-  .sheet{
-    border:1px solid var(--line); border-radius:14px; padding:16px 18px;
-    background:color-mix(in oklab, var(--bg) 96%, transparent);
-    min-width:min(520px, 92vw);
-  }
-  .sheet h3{margin:0 0 10px; font:600 12px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.4px}
-  .links{display:flex; flex-wrap:wrap; gap:10px}
-  .links a{border:1px solid var(--line); border-radius:999px; padding:6px 10px; font:12px var(--mono)}
-  .close{
-    position:absolute; top:12px; right:12px; border:1px solid var(--line); background:transparent;
-    border-radius:999px; padding:4px 8px; font:12px var(--mono); cursor:pointer;
-  }
-
-  /* =============== responsive tweak for small screens =============== */
-  @media (max-width:900px){
-    :root{ --grid-cols: 3; }
-  }
-  @media (max-width:640px){
-    :root{ --grid-cols: 2; --grid-w: 92vw; --grid-h: 60vh; }
+  @media (max-width:720px){
+    :root{ --cols:2; --center-w:92vw; --center-h:66vh; }
   }
 </style>
 </head>
 <body>
 
-<!-- ===== Header ===== -->
 <header>
-  <div class="title" id="siteTitle">Ethan Granat — Portfolio</div>
-  <button class="menu-btn" id="menuBtn" aria-haspopup="dialog" aria-controls="menu" aria-expanded="false" aria-label="Open menu">≡</button>
+  <div class="title">Ethan Granat — Portfolio</div>
+  <nav class="side-links">
+    <a href="#modeling">Modeling</a>
+    <a href="#news">News</a>
+    <a href="#projects">Projects</a>
+    <a href="#contact">Contact</a>
+  </nav>
 </header>
 
-<!-- ===== Center Stage (grid in the middle portion only) ===== -->
-<main class="stage">
-  <section class="grid-wrap" aria-label="Selected work">
-    <div class="grid-head">
-      <div class="k">Selected Work</div>
-      <div class="k" id="count"></div>
-    </div>
-    <div class="grid" id="grid"></div>
+<main>
+  <section class="center">
+    <!-- LEFT: TEXT (separate) -->
+    <aside class="text-panel" id="about">
+      <h2>Overview</h2>
+      <h3>Designer / engineer working on minimal interfaces and circular materials.</h3>
+      <p>Currently in WA; available for select collaborations. I like clean systems, readable UI, and practical material choices.</p>
+      <div class="blips">
+        <span class="blip">UI · Web</span>
+        <span class="blip">Composites</span>
+        <span class="blip">DSC/DMA</span>
+        <span class="blip">Injection Molding</span>
+      </div>
+    </aside>
+
+    <!-- RIGHT: GRID -->
+    <section class="grid-panel" id="projects">
+      <div class="grid-head">
+        <div class="k">Selected Work</div>
+        <div class="k" id="count"></div>
+      </div>
+      <div class="grid" id="grid"></div>
+    </section>
   </section>
 </main>
 
-<!-- ===== Footer (tiny) ===== -->
 <footer>© <span id="y"></span> Ethan</footer>
 
-<!-- ===== Minimal Overlay Menu ===== -->
-<div class="overlay" id="menu" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Menu">
-  <button class="close" id="closeMenu" aria-label="Close menu">×</button>
-  <div class="sheet">
-    <h3>Menu</h3>
-    <nav class="links" aria-label="Site">
-      <!-- edit your menu items here -->
-      <a href="mailto:hello@example.com">Email</a>
-      <a href="#" target="_blank_
+<script>
+/* ======= DATA (edit this) ======= */
+const COLS  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cols')) || 4;
+const ROWS  = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--rows')) || 2;
+const PROJECTS = [
+  { title:"Microsite — On Borrowed Fabric", role:"Design · 2024", img:"project1.jpg", url:"#"},
+  { title:"Composite I-Beam Study",        role:"Materials · 2023", img:"project2.jpg", url:"#"},
+  // Add more; empty slots will show as visible placeholders.
+];
+
+/* ======= RENDER ======= */
+const totalSlots = COLS * ROWS;
+const items = [...PROJECTS]; // copy
+while(items.length < totalSlots){ items.push(null); } // fill with placeholders
+
+const $grid = document.getElementById('grid');
+items.slice(0, totalSlots).forEach((p, i) => {
+  const a = document.createElement(p ? 'a' : 'div');
+  a.className = 'tile';
+  if(p?.url){ a.href = p.url; a.target = '_blank'; a.rel = 'noreferrer'; }
+  a.innerHTML = `
+    <div class="meta">
+      <div class="t">${p?.title || 'Empty slot'}</div>
+      <div class="k">${p?.role || 'Add project'}</div>
+    </div>
+    <div class="thumb">
+      ${p?.img ? `<img src="${p.img}" alt="">` : '—'}
+    </div>
+    <div class="cta">${p ? 'view →' : 'slot'}</div>
+  `;
+  $grid.appendChild(a);
+});
+
+document.getElementById('count').textContent = PROJECTS.length + " projects";
+document.getElementById('y').textContent = new Date().getFullYear();
+
+/* Lock out scrolling if someone adds too much text by accident */
+function clampNoScroll(){
+  document.body.style.overflow = 'hidden';
+}
+clampNoScroll(); addEventListener('resize', clampNoScroll);
+</script>
+</body>
+</html>
+
