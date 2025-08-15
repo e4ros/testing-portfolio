@@ -3,83 +3,151 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Ethan — Portfolio Mosaic</title>
+<title>Ethan — Portfolio</title>
 <meta name="color-scheme" content="light dark" />
 <style>
+  /* =============== reset / tokens =============== */
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;height:100%}
   img{max-width:100%;display:block}
   a{color:inherit;text-decoration:none}
   :root{
-    --bg:#fff; --fg:#0b0b0b; --muted:#777; --line:#e0e0e0;
-    --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial;
+    --bg:#ffffff; --fg:#0b0b0b; --muted:#777; --line:#e7e7e7;
+    --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Inter, Roboto, "Helvetica Neue", Arial;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+    /* ===== quick knobs you can tweak ===== */
+    --grid-w: min(1000px, 72vw);   /* width of the central grid area */
+    --grid-h: min(620px, 58vh);    /* height of the central grid area */
+    --grid-cols: 4;                /* number of columns */
+    --tile-ratio: 4/3;             /* tile aspect ratio */
+    --gap: 12px;                   /* space between tiles */
+    --radius: 10px;                /* tile corner radius */
+    --pad: 14px;                   /* tile inner padding */
   }
   @media (prefers-color-scheme: dark){
-    :root{--bg:#0b0b0b; --fg:#f2f2f2; --muted:#aaa; --line:#333;}
+    :root{--bg:#0b0b0b; --fg:#f2f2f2; --muted:#aaa; --line:#2a2a2a;}
   }
   body{
-    background:var(--bg);
-    color:var(--fg);
-    font-family:var(--sans);
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
-    grid-auto-rows:1fr;
-    gap:10px;
+    background:var(--bg); color:var(--fg); font-family:var(--sans);
+    height:100vh; overflow:hidden; display:grid; grid-template-rows:auto 1fr auto;
+  }
+
+  /* =============== header with centered title + hamburger =============== */
+  header{
+    position:relative; display:grid; place-items:center; height:68px;
+    border-bottom:1px solid var(--line);
+  }
+  .title{font-weight:600; letter-spacing:.2px}
+  .menu-btn{
+    position:absolute; right:14px; top:50%; transform:translateY(-50%);
+    border:1px solid var(--line); background:transparent; color:inherit;
+    border-radius:999px; padding:6px 10px; font:12px/1 var(--mono); cursor:pointer;
+  }
+  .menu-btn:focus-visible{outline:2px solid currentColor; outline-offset:2px}
+
+  /* =============== center stage =============== */
+  .stage{
+    display:grid; place-items:center; padding:10px;
+  }
+  .grid-wrap{
+    width:var(--grid-w); height:var(--grid-h);
+    margin:auto;
+    display:grid; grid-template-rows:auto 1fr; gap:10px;
+    border:1px solid var(--line); border-radius:16px;
+    background:color-mix(in oklab, var(--bg) 96%, transparent);
     padding:10px;
-    height:100vh;
+  }
+  .grid-head{
+    display:flex; align-items:center; justify-content:space-between;
+    font:12px var(--mono); color:var(--muted);
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(var(--grid-cols), 1fr);
+    grid-auto-rows:1fr;
+    gap:var(--gap);
   }
   .tile{
-    border:1px solid var(--line);
-    border-radius:6px;
-    overflow:hidden;
-    display:flex;
-    flex-direction:column;
-    justify-content:space-between;
+    border:1px solid var(--line); border-radius:var(--radius);
+    overflow:hidden; display:grid; grid-template-rows:auto 1fr auto;
+    background:color-mix(in oklab, var(--bg) 98%, transparent);
+  }
+  .thumb{
+    aspect-ratio:var(--tile-ratio);
+    background:#111; display:grid; place-items:center; overflow:hidden;
+  }
+  .thumb img{width:100%; height:100%; object-fit:cover}
+  .meta{padding:var(--pad); display:grid; gap:6px}
+  .t{font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .k{font:11px var(--mono); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .cta{padding:var(--pad); border-top:1px solid var(--line); font:12px var(--mono); color:var(--muted)}
+  .tile.link{display:flex; align-items:center; justify-content:center; font-weight:600; font-size:14px}
+
+  /* =============== footer (tiny) =============== */
+  footer{
+    height:44px; display:flex; align-items:center; justify-content:center;
+    border-top:1px solid var(--line); color:var(--muted); font:12px var(--mono);
+  }
+
+  /* =============== minimal overlay menu =============== */
+  .overlay{
+    position:fixed; inset:0; background:color-mix(in oklab, var(--bg) 85%, transparent);
+    backdrop-filter:saturate(160%) blur(4px);
+    display:none; place-items:center; z-index:10;
+  }
+  .overlay[aria-hidden="false"]{display:grid}
+  .sheet{
+    border:1px solid var(--line); border-radius:14px; padding:16px 18px;
     background:color-mix(in oklab, var(--bg) 96%, transparent);
+    min-width:min(520px, 92vw);
   }
-  .thumb{flex:1; background:#111}
-  .thumb img{width:100%;height:100%;object-fit:cover}
-  .label{
-    padding:8px;
-    font-size:13px;
-    font-weight:600;
-    border-top:1px solid var(--line);
+  .sheet h3{margin:0 0 10px; font:600 12px var(--mono); color:var(--muted); text-transform:uppercase; letter-spacing:.4px}
+  .links{display:flex; flex-wrap:wrap; gap:10px}
+  .links a{border:1px solid var(--line); border-radius:999px; padding:6px 10px; font:12px var(--mono)}
+  .close{
+    position:absolute; top:12px; right:12px; border:1px solid var(--line); background:transparent;
+    border-radius:999px; padding:4px 8px; font:12px var(--mono); cursor:pointer;
   }
-  .contact{
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:600;
-    font-size:14px;
+
+  /* =============== responsive tweak for small screens =============== */
+  @media (max-width:900px){
+    :root{ --grid-cols: 3; }
+  }
+  @media (max-width:640px){
+    :root{ --grid-cols: 2; --grid-w: 92vw; --grid-h: 60vh; }
   }
 </style>
 </head>
 <body>
-  <!-- Name tile -->
-  <div class="tile contact">Ethan Granat<br><span style="font-weight:400;font-size:12px;color:var(--muted)">Designer & Engineer</span></div>
 
-  <!-- Project tiles -->
-  <a href="#" class="tile">
-    <div class="thumb"><img src="project1.jpg" alt=""></div>
-    <div class="label">Microsite — On Borrowed Fabric</div>
-  </a>
-  <a href="#" class="tile">
-    <div class="thumb"><img src="project2.jpg" alt=""></div>
-    <div class="label">Composite I-beam Study</div>
-  </a>
-  <a href="#" class="tile">
-    <div class="thumb"><img src="project3.jpg" alt=""></div>
-    <div class="label">Zero-waste Workshop Kit</div>
-  </a>
-  <a href="#" class="tile">
-    <div class="thumb"><img src="project4.jpg" alt=""></div>
-    <div class="label">Minimal UI Concept</div>
-  </a>
+<!-- ===== Header ===== -->
+<header>
+  <div class="title" id="siteTitle">Ethan Granat — Portfolio</div>
+  <button class="menu-btn" id="menuBtn" aria-haspopup="dialog" aria-controls="menu" aria-expanded="false" aria-label="Open menu">≡</button>
+</header>
 
-  <!-- Contact link tiles -->
-  <a href="mailto:hello@example.com" class="tile contact">Email</a>
-  <a href="#" class="tile contact">Resume</a>
-  <a href="https://github.com" class="tile contact">GitHub</a>
-  <a href="https://instagram.com" class="tile contact">Instagram</a>
-</body>
-</html>
+<!-- ===== Center Stage (grid in the middle portion only) ===== -->
+<main class="stage">
+  <section class="grid-wrap" aria-label="Selected work">
+    <div class="grid-head">
+      <div class="k">Selected Work</div>
+      <div class="k" id="count"></div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
+
+<!-- ===== Footer (tiny) ===== -->
+<footer>© <span id="y"></span> Ethan</footer>
+
+<!-- ===== Minimal Overlay Menu ===== -->
+<div class="overlay" id="menu" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Menu">
+  <button class="close" id="closeMenu" aria-label="Close menu">×</button>
+  <div class="sheet">
+    <h3>Menu</h3>
+    <nav class="links" aria-label="Site">
+      <!-- edit your menu items here -->
+      <a href="mailto:hello@example.com">Email</a>
+      <a href="#" target="_blank_
