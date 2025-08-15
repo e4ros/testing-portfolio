@@ -12,6 +12,8 @@ a{color:inherit;text-decoration:none}
   /* center region */
   --center-w: min(1100px, 78vw);
   --center-h: min(620px, 64vh);
+  .center{ border:none; }
+
 
   /* grid (home) */
   --cols: 4;
