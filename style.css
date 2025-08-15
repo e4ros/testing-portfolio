@@ -95,3 +95,20 @@ footer{
 @media (max-width:720px){
   :root{ --cols:2; --center-w:92vw; --center-h:66vh; }
 }
+
+/* About page: switch everything to serif */
+body.about {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+/* Side links use a mono font in the base CSS, so override that too */
+body.about .side-links {
+  font: 14px/1 ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
+/* If you want the small meta style to be serif anywhere on About, keep this; otherwise remove */
+body.about .k,
+body.about .t {
+  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+}
+
