@@ -1,28 +1,49 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>About — Ethan Granat</title>
-<meta name="color-scheme" content="light dark" />
-<style>
-  body {
-    font-family: sans-serif;
-    max-width: 800px;
-    margin: 40px auto;
-    padding: 0 20px;
-    line-height: 1.6;
-  }
-  a { color: blue; }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About — Ethan Granat</title>
+  <meta name="color-scheme" content="light dark" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>About Me</h1>
-  <p>
-    I'm a designer and engineer working on minimal interfaces, circular material systems, and sustainable processes.
-  </p>
-  <p>
-    <a href="index.html">← Back to portfolio</a>
-  </p>
+
+<header>
+  <div class="title">Ethan Granat — Portfolio</div>
+  <nav class="side-links">
+    <a href="#modeling">Modeling</a>
+    <a href="#news">News</a>
+    <a href="index.html#projects">Projects</a>
+    <a href="about.html">About</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
+
+<main>
+  <section class="center">
+    <article class="content">
+      <h1>About</h1>
+      <p>
+        I’m a designer & engineer focused on minimal interfaces and circular materials.
+        I like readable UI, clear information architecture, and practical material systems.
+      </p>
+      <p>
+        Recent work spans UI concepts, composite structures, and campus zero-waste initiatives.
+        If you’d like to collaborate, email me.
+      </p>
+      <p class="small"><a href="index.html">← Back to portfolio</a></p>
+    </article>
+  </section>
+</main>
+
+<footer>© <span id="y"></span> Ethan</footer>
+
+<script>
+  document.getElementById('y').textContent = new Date().getFullYear();
+  // prevent page scroll; the text area will scroll internally if long
+  document.body.style.overflow = 'hidden';
+</script>
 </body>
 </html>
+
