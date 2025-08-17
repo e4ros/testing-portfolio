@@ -6,7 +6,6 @@
 <title>Ethan Granat</title>
 <meta name="color-scheme" content="light dark" />
 <style>
-  /* ===== reset / tokens ===== */
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;height:100%}
   img{max-width:100%;display:block}
@@ -17,15 +16,13 @@
     --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial;
     --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 
-    /* center panel size (tweak these) */
     --center-w: min(1100px, 78vw);
     --center-h: min(620px, 64vh);
 
-    /* grid controls */
-    --cols: 4;          /* number of columns */
+    --cols: 4;
     --gap: 12px;
     --radius: 10px;
-    --tile-ratio: 4/3;  /* 1/1 for squares, 16/9 for wide */
+    --tile-ratio: 4/3;
 
     --pad: 14px;
   }
@@ -36,20 +33,18 @@
 
   body{
     background:var(--bg); color:var(--fg); font-family:var(--sans);
-    height:100vh; overflow:hidden; display:grid;
+    height:100vh; display:grid;
     grid-template-rows:auto 1fr auto;
+    overflow:hidden; /* lock viewport, no scroll */
   }
 
-  /* ===== header (title left) ===== */
   header{
     position:relative; height:68px; display:flex; align-items:center;
-    border-bottom:1px solid var(--line); padding-left:20px;
+    border-bottom:none; /* removed divider */
+    padding-left:20px;
   }
-  .title{
-    font-weight:600; font-size:clamp(18px,3vw,26px); text-align:left; text-decoration:none;
-  }
+  .title{font-weight:600; font-size:clamp(18px,3vw,26px);}
 
-  /* ===== right-side vertical links (fixed on the right edge) ===== */
   .side-links{
     position:fixed; right:20px; top:50%; transform:translateY(-50%);
     display:flex; flex-direction:column; gap:12px;
@@ -58,14 +53,14 @@
   .side-links a{color:var(--muted); text-decoration:none}
   .side-links a:hover{color:var(--fg)}
 
-  /* ===== center grid panel ===== */
-  main{display:grid; place-items:center; padding:10px}
+  main{display:grid; place-items:center; padding:10px; overflow:hidden}
   .center{
     width:var(--center-w); height:var(--center-h);
     display:grid; grid-template-rows:auto 1fr; gap:10px;
     border:1px solid var(--line); border-radius:12px;
     background:color-mix(in oklab, var(--bg) 96%, transparent);
     padding:10px;
+    overflow:hidden;
   }
   .grid-head{
     display:flex; align-items:center; justify-content:space-between;
@@ -84,11 +79,9 @@
   .t{font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
   .k{font:11px var(--mono); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
-  /* shadow placeholder surface; image will override it */
   .thumb{
     aspect-ratio:var(--tile-ratio);
-    background:
-      repeating-linear-gradient(45deg,
+    background:repeating-linear-gradient(45deg,
         color-mix(in oklab,var(--bg) 94%, transparent) 0 10px,
         transparent 10px 20px);
     display:grid; place-items:center; color:var(--muted); font:12px var(--mono);
@@ -96,13 +89,11 @@
   .thumb img{width:100%; height:100%; object-fit:cover}
   .cta{border-top:1px solid var(--line); padding:6px var(--pad); font:12px var(--mono); color:var(--muted)}
 
-  /* ===== footer ===== */
   footer{
     height:40px; display:flex; align-items:center; justify-content:center;
     border-top:1px solid var(--line); color:var(--muted); font:12px var(--mono);
   }
 
-  /* ===== responsive ===== */
   @media (max-width:980px){ :root{ --cols:3; } }
   @media (max-width:720px){
     :root{ --cols:2; --center-w:92vw; --center-h:66vh; }
@@ -115,7 +106,6 @@
   <div class="title">Ethan Granat</div>
 </header>
 
-<!-- Right-side vertical links -->
 <nav class="side-links" aria-label="Site links">
   <a href="#modeling">Modeling</a>
   <a href="#news">News</a>
@@ -137,24 +127,17 @@
 <footer>© <span id="y"></span> Ethan</footer>
 
 <script>
-/* =========================
-   EDIT YOUR PROJECTS HERE
-   ========================= */
 const PROJECTS = [
-  // Add/modify as you like. Images are optional; empty slots will show placeholders.
   { title:"Microsite — On Borrowed Fabric", role:"Design · 2024", img:"images/project1.jpg", url:"#"},
   { title:"Composite I-Beam Study",        role:"Materials · 2023", img:"images/project2.jpg", url:"#"},
-  // { title:"Zero-Waste Workshop Kit",      role:"Education · 2022", img:"images/project3.jpg", url:"#"},
-  // { title:"Minimal UI Concept",           role:"UI · 2025",       img:"images/project4.jpg", url:"#"},
 ];
 
-/* ----- GRID SETTINGS ----- */
 const COLS = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cols')) || 4;
-const ROWS = 2;                  // how many rows to show in the grid panel
+const ROWS = 2;
 const TOTAL = COLS * ROWS;
 
 const items = [...PROJECTS];
-while (items.length < TOTAL) items.push(null);  // fill with placeholders
+while (items.length < TOTAL) items.push(null);
 
 const $grid  = document.getElementById('grid');
 const $count = document.getElementById('count');
@@ -177,9 +160,6 @@ items.slice(0, TOTAL).forEach(p => {
 
 if ($count) $count.textContent = `${PROJECTS.length} project${PROJECTS.length===1?'':'s'}`;
 document.getElementById('y').textContent = new Date().getFullYear();
-
-/* Keep page non-scrolling */
-document.body.style.overflow = 'hidden';
 </script>
 </body>
 </html>
