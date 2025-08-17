@@ -18,9 +18,9 @@ const BASE = (() => {
   const count = document.getElementById('count');
 
   const PROJECTS = [
-    { title: "Microsite — On Borrowed Fabric", role: "Design · 2024", img: `${BASE}images/project1.jpg`, url: "#" },
+    { title: "Microsite — On Borrowed Fabric", role: "Design · 2024",   img: `${BASE}images/project1.jpg`, url: "#" },
     { title: "Composite I-Beam Study",          role: "Materials · 2023", img: `${BASE}images/project2.jpg`, url: "#" },
-    // If you want your modeling image to also appear on Projects, uncomment the next line:
+    // If you want your modeling image to also appear on Projects, uncomment:
     // { title: "Modeling — FK6A9868", role: "Modeling", img: `${BASE}images/FK6A9868.JPG`, url: "#" },
   ];
 
@@ -51,16 +51,20 @@ const BASE = (() => {
   if (count) count.textContent = `${PROJECTS.length} project${PROJECTS.length === 1 ? '' : 's'}`;
 })();
 
-/* ---------- Modeling gallery (7 × 5 = 35 tiles, images only) ---------- */
+/* ---------- Modeling gallery (fixed 7 × 5 = 35 tiles, images only) ---------- */
 (() => {
   const gallery = document.getElementById('gallery');
-  if (!gallery) return; // not the Modeling page
+  if (!gallery) return; // only run when a gallery exists
+  if (!document.body.classList.contains('modeling')) return; // run on Modeling page only
 
   const TOTAL_TILES = 35;
   const IMAGES = [
     `${BASE}images/FK6A9868.JPG`,  // <-- your uploaded image (exact case)
     // add more like: `${BASE}images/another.JPG`,
   ];
+
+  // in case something pre-populated it, start clean
+  if (gallery.children.length) gallery.innerHTML = '';
 
   for (let i = 0; i < TOTAL_TILES; i++) {
     const el = document.createElement('div');
