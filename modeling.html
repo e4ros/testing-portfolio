@@ -7,12 +7,12 @@
   <meta name="color-scheme" content="light dark" />
   <link rel="stylesheet" href="style.css">
 
-  <!-- Plain-text, FIXED slider controls -->
+  <!-- Plain-text, fixed-left slider controls -->
   <style>
     .slider-controls{
-      position: fixed;             /* fixed to viewport (does NOT move) */
+      position: fixed;             /* fixed to viewport */
       left: 16px;                  /* constant horizontal offset */
-      top: 88px;                   /* constant vertical offset (tweak if you like) */
+      /* top is set by JS to the middle of the gallery area */
       display: flex; align-items: center; gap: 10px;
       padding: 0; border: 0; background: transparent;
       font: 14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
@@ -80,7 +80,7 @@
     img.style.display = 'block';
     g.appendChild(img);
 
-    // FIXED controls (do not move)
+    // FIXED-LEFT controls (top set by JS to gallery’s vertical midpoint)
     var controls = document.createElement('div');
     controls.className = 'slider-controls';
     controls.innerHTML =
@@ -100,8 +100,8 @@
       return pt + pb;
     }
 
-    // CONSTANT gutter to the left so the image never sits under the fixed controls
-    var LEFT_GUTTER = 140;  // px (controls width + breathing room). Tweak if you want.
+    // CONSTANT left gutter so the image never sits under the fixed-left controls
+    var LEFT_GUTTER = 140;  // px — tweak if you want more/less space
 
     function fit(){
       // Height between header and footer (no scroll)
@@ -122,8 +122,25 @@
       var rightReserve = 0;
       if (menu) rightReserve = Math.ceil(menu.getBoundingClientRect().width) + 12;
 
-      // Respect main's horizontal padding (10px + 10px = 20px) AND the constant LEFT_GUTTER
+      // Respect main's horizontal padding (10+10 = 20) + LEFT_GUTTER + rightReserve
       img.style.maxWidth = 'calc(100vw - ' + (20 + LEFT_GUTTER + rightReserve) + 'px)';
+
+      placeControlsVertically();
+    }
+
+    // Vertically center controls within the gallery area (NOT tied to image size)
+    function placeControlsVertically(){
+      var gr = g.getBoundingClientRect();
+      var ch = controls.offsetHeight || 0;
+
+      var top = Math.round(gr.top + (gr.height - ch) / 2);
+
+      // Clamp inside viewport just in case
+      var maxTop = (window.innerHeight || 0) - ch - 8;
+      if (top < 8) top = 8;
+      if (top > maxTop) top = maxTop;
+
+      controls.style.top = top + 'px';
     }
 
     function updateButtons(){
@@ -137,6 +154,7 @@
       index = Math.max(0, Math.min(IMAGES.length - 1, i));
       img.src = IMAGES[index];
       updateButtons();
+      // controls stay fixed-left and centered to the gallery; no reposition from image size
     }
 
     // Wire up controls + keyboard
@@ -147,21 +165,6 @@
       if (e.key === 'ArrowRight') show(index + 1);
     });
 
-    // Init
-    show(0);
-    fit();
+    /
 
-    // Keep layout correct on common events
-    window.addEventListener('load', fit);
-    window.addEventListener('resize', fit);
-    window.addEventListener('orientationchange', fit);
-    window.addEventListener('pageshow', fit);
-    img.addEventListener('load', fit);
-
-    // Footer year
-    var y = document.getElementById('y');
-    if (y) y.textContent = new Date().getFullYear();
-  })();
-  </script>
-</body>
-</html>
+  
