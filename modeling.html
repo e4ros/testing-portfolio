@@ -32,30 +32,36 @@
     const $g = document.getElementById('gallery');
     if (!$g) return;
 
-    // Create one tile that spans the entire grid
+    // Build one full-span tile
     const tile = document.createElement('div');
     tile.className = 'tile';
     tile.style.gridRow = '1 / -1';
     tile.style.gridColumn = '1 / -1';
+    // Center contents and let the image size itself via max- constraints
+    tile.style.display = 'flex';
+    tile.style.alignItems = 'center';
+    tile.style.justifyContent = 'center';
 
     const img = new Image();
     img.alt = '';
     img.src = '/testing-portfolio/images/FK6A9868.JPG'; // exact path & case
-    // Make the image fill available space while preserving aspect ratio
-    img.style.width = '100%';
-    img.style.height = '100%';
-    img.style.objectFit = 'contain';
+
+    // Fit image inside available space while preserving aspect ratio
+    img.style.maxWidth  = '100%';
+    img.style.maxHeight = '100%';
+    img.style.width  = 'auto';
+    img.style.height = 'auto';
     img.style.display = 'block';
 
     tile.appendChild(img);
     $g.appendChild(tile);
 
-    function getVerticalPadding(el) {
+    // Precisely size the gallery to fill viewport between header and footer (no scroll)
+    function verticalPadding(el){
       const cs = getComputedStyle(el);
-      return (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+      return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
     }
-
-    function fitGalleryHeight() {
+    function fitGalleryHeight(){
       const header = document.querySelector('header');
       const footer = document.querySelector('footer');
       const main   = document.querySelector('main');
@@ -63,33 +69,27 @@
       const viewportH = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
       const headerH   = header ? header.getBoundingClientRect().height : 0;
       const footerH   = footer ? footer.getBoundingClientRect().height : 0;
-      const mainPadV  = main ? getVerticalPadding(main) : 0;
+      const mainPadV  = main ? verticalPadding(main) : 0;
 
       const h = Math.max(0, viewportH - headerH - footerH - mainPadV);
-      // apply on the next frame to avoid layout thrash during initial paint
-      requestAnimationFrame(() => { $g.style.height = h + 'px'; });
+      $g.style.height = h + 'px';
     }
 
-    // Run at key moments
-    document.addEventListener('DOMContentLoaded', fitGalleryHeight);
+    // Run on first paint and on any viewport/layout change
+    fitGalleryHeight();
     window.addEventListener('load', fitGalleryHeight, { once: true });
     window.addEventListener('resize', fitGalleryHeight);
     window.addEventListener('orientationchange', fitGalleryHeight);
-    window.addEventListener('pageshow', fitGalleryHeight); // bfcache restore
-    if (document.fonts && document.fonts.ready) {
-      document.fonts.ready.then(fitGalleryHeight);
-    }
+    window.addEventListener('pageshow', fitGalleryHeight);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitGalleryHeight);
     img.addEventListener('load', fitGalleryHeight);
 
-    // Resize again if header or footer change size (responsive text)
+    // Track header/footer size changes (responsive text/zoom)
     const ro = new ResizeObserver(fitGalleryHeight);
     const header = document.querySelector('header');
     const footer = document.querySelector('footer');
     if (header) ro.observe(header);
     if (footer) ro.observe(footer);
-
-    // Initial sizing
-    fitGalleryHeight();
   })();
 
   // footer year
