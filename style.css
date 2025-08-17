@@ -13,7 +13,6 @@ a{color:inherit;text-decoration:none}
   --center-w: min(1100px, 78vw);
   --center-h: min(620px, 64vh);
 
-
   /* grid (home) */
   --cols: 4;
   --gap: 12px;
@@ -27,34 +26,58 @@ a{color:inherit;text-decoration:none}
   :root{--bg:#0b0b0b; --fg:#f2f2f2; --muted:#aaa; --line:#2a2a2a;}
 }
 
+/* ===== page frame: lock to viewport (no outer scroll) ===== */
 body{
   background:var(--bg); color:var(--fg); font-family:var(--sans);
-  height:100vh; overflow:hidden; display:grid; grid-template-rows:auto 1fr auto;
+  height:100vh; overflow:hidden;
+  display:grid; grid-template-rows:auto 1fr auto;
 }
 
-/* ===== shared header (left title, right vertical links) ===== */
+/* ===== shared header ===== */
 header{
   position:relative; height:68px; display:flex; align-items:center;
   border-bottom:none;
+  padding-left:20px;
 }
+
+/* Pin header & nav fonts so About's serif doesn't override them */
+header, .title, .side-links { font-family: var(--sans) !important; }
+
 .title{
   font-weight:600; font-size:clamp(18px,3vw,26px); text-align:left; text-decoration:none;
 }
+
+/* ===== right-side vertical nav (PINNED to viewport) =====
+   (changed from absolute-in-header -> fixed to window)
+*/
 .side-links{
-  position:absolute; right:20px; top:50%; transform:translateY(-50%);
-  display:flex; flex-direction:column; gap:12px; font:14px var(--mono); text-align:right;
+  position:fixed; right:20px; top:50%; transform:translateY(-50%);
+  display:flex; flex-direction:column; gap:12px;
+  font:14px var(--mono); text-align:right; z-index:10;
+
+  /* keep it on-screen for short windows; internal scroll if needed */
+  max-height: calc(100vh - 120px);
+  overflow:auto;
+  scrollbar-width: thin;
 }
 .side-links a{color:var(--muted); text-decoration:none}
 .side-links a:hover{color:var(--fg)}
 
-/* ===== center panels (both pages) ===== */
-main{display:grid; place-items:center; padding:10px}
+@media (max-height:560px){
+  .side-links{ gap:8px; font-size:12px; }
+}
+@media (max-height:460px){
+  .side-links{ gap:6px; font-size:11px; }
+}
+
+/* ===== center panels ===== */
+main{display:grid; place-items:center; padding:10px; overflow:hidden}
 .center{
-  border:none;
   width:var(--center-w); height:var(--center-h);
   display:grid; border:1px solid var(--line); border-radius:12px;
   background:color-mix(in oklab, var(--bg) 96%, transparent);
   padding:10px;
+  overflow:hidden; /* contain inner scroll areas */
 }
 
 /* ===== home: grid panel ===== */
@@ -77,9 +100,9 @@ main{display:grid; place-items:center; padding:10px}
 .thumb img{width:100%; height:100%; object-fit:cover}
 .cta{border-top:1px solid var(--line); padding:6px var(--pad); font:12px var(--mono); color:var(--muted)}
 
-/* ===== about page: content panel ===== */
+/* ===== about/contact: content area ===== */
 .content{
-  display:block; overflow:auto; padding:6px 10px; /* scrolls inside panel if long */
+  display:block; overflow:auto; padding:6px 10px; /* internal scroll if long */
 }
 .content h1{margin:0 0 8px; font-size:20px}
 .content p{margin:0 0 12px; line-height:1.55}
@@ -98,19 +121,14 @@ footer{
   :root{ --cols:2; --center-w:92vw; --center-h:66vh; }
 }
 
-/* About page: switch everything to serif */
-body.about {
+/* ===== About page: keep unique BODY TEXT font, not header/nav =====
+   (changed: remove global body.about override; scope serif to .content only)
+*/
+.about .content{
   font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
-/* Side links use a mono font in the base CSS, so override that too */
-body.about .side-links {
-  font: 14px/1 ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-}
-
-/* If you want the small meta style to be serif anywhere on About, keep this; otherwise remove */
-body.about .k,
-body.about .t {
-  font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-}
-
+/* If you also want About's tile/meta text serif INSIDE content, uncomment:
+.about .content .k,
+.about .content .t { font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif; }
+*/
