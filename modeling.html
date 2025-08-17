@@ -22,10 +22,7 @@
   </nav>
 
   <main>
-    <!-- Inline height uses dynamic viewport (dvh) and your known header/footer/padding sizes:
-         header 68px + footer 40px + main padding (10px top + 10px bottom) = 118px -->
-    <div class="gallery" id="gallery" aria-label="Modeling Gallery"
-         style="height:calc(100dvh - 118px)"></div>
+    <div class="gallery" id="gallery" aria-label="Modeling Gallery"></div>
   </main>
 
   <footer>© <span id="y"></span> Ethan</footer>
@@ -35,31 +32,30 @@
     const $g = document.getElementById('gallery');
     if (!$g) return;
 
-    // One tile spanning the entire grid
-    const tile = document.createElement('div');
-    tile.className = 'tile';
-    tile.style.gridRow = '1 / -1';
-    tile.style.gridColumn = '1 / -1';
-    // Center the image; let it size with max-constraints
-    tile.style.display = 'flex';
-    tile.style.alignItems = 'center';
-    tile.style.justifyContent = 'center';
+    // Center the image inside the gallery and give the gallery a fixed viewport-based height
+    // Header: 68px, Footer: 40px, Main padding: 10px top + 10px bottom = 20px → total 128px
+    $g.style.display = 'flex';
+    $g.style.alignItems = 'center';
+    $g.style.justifyContent = 'center';
+    $g.style.height = 'calc(100dvh - 128px)'; // dynamic viewport height => no manual resize needed
 
+    // Build a single image that scales to fit while keeping aspect ratio
     const img = new Image();
     img.alt = '';
     img.src = '/testing-portfolio/images/FK6A9868.JPG'; // exact path & case
-    // Maintain aspect ratio, fill available area without overflow
-    img.style.maxWidth = '100%';
+
+    // Fit within available space; no scroll; preserve aspect ratio
+    img.style.maxWidth  = 'calc(100vw - 20px)'; // 20px = main left+right padding (10+10)
     img.style.maxHeight = '100%';
-    img.style.width = 'auto';
+    img.style.width  = 'auto';
     img.style.height = 'auto';
     img.style.display = 'block';
 
-    tile.appendChild(img);
-    $g.appendChild(tile);
+    $g.appendChild(img);
 
-    // Update footer year
-    document.getElementById('y').textContent = new Date().getFullYear();
+    // Footer year
+    const y = document.getElementById('y');
+    if (y) y.textContent = new Date().getFullYear();
   })();
   </script>
 </body>
