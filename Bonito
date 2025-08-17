@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bonito — Ethan Granat</title>
+  <meta name="color-scheme" content="light dark" />
+  <link rel="stylesheet" href="style.css">
+
+  <!-- tiny page-local styles for the Instagram link -->
+  <style>
+    .ext-link {
+      position:absolute; left:12px; top:10px;
+      font:12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: var(--muted, #777);
+      text-decoration: none;
+    }
+    .ext-link:hover { text-decoration: underline; color: inherit; }
+  </style>
+</head>
+<body class="bonito">
+  <header>
+    <div class="title">Ethan Granat</div>
+  </header>
+
+  <!-- fixed side menu (includes Bonito link) -->
+  <nav class="side-links" aria-label="Site links">
+    <a href="modeling.html">Modeling</a>
+    <a href="news.html">News</a>
+    <a href="index.html">Projects</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+    <a href="bonito.html" aria-current="page">Bonito</a>
+  </nav>
+
+  <main>
+    <div class="gallery" id="gallery" aria-label="Bonito Video Area"></div>
+  </main>
+
+  <footer>© <span id="y"></span> Ethan</footer>
+
+  <script>
+  (function () {
+    var g = document.getElementById('gallery');
+    if (!g) return;
+
+    // Make the gallery the positioning context and center content
+    g.style.position = 'relative';
+    g.style.display = 'flex';
+    g.style.alignItems = 'center';
+    g.style.justifyContent = 'center';
+
+    // Create the Instagram link (top-left, small)
+    var link = document.createElement('a');
+    link.className = 'ext-link';
+    link.href = 'https://www.instagram.com/reel/DFdfDSjPm6w/';
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'View on Instagram →';
+    g.appendChild(link);
+
+    // Create the video (scaled to fit; keeps aspect; no scroll)
+    var vid = document.createElement('video');
+    vid.controls = true;
+    vid.playsInline = true;  // iOS-friendly
+    vid.preload = 'metadata';
+    vid.src = '/testing-portfolio/videos/bonitov5.mp4'; // GitHub Pages path
+    vid.style.maxHeight = '100%';
+    vid.style.width = 'auto';
+    vid.style.height = 'auto';
+    vid.style.display = 'block';
+    g.appendChild(vid);
+
+    function vpad(el){
+      var cs = window.getComputedStyle ? getComputedStyle(el) : el.currentStyle;
+      var pt = parseFloat(cs.paddingTop)||0, pb = parseFloat(cs.paddingBottom)||0;
+      return pt + pb;
+    }
+
+    // Size the gallery to the visible viewport area (between header and footer)
+    function fit(){
+      var vh     = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
+      var header = document.querySelector('header');
+      var footer = document.querySelector('footer');
+      var main   = document.querySelector('main');
+      var menu   = document.querySelector('.side-links');
+
+      var headerH = header ? header.offsetHeight : 0;
+      var footerH = footer ? footer.offsetHeight : 0;
+      var mainPad = main ? vpad(main) : 0;
+
+      var h = Math.max(0, vh - headerH - footerH - mainPad);
+      g.style.height = h + 'px';
+
+      // Reserve right gutter for the side menu so the video never sits underneath it (desktop)
+      var rightReserve = 0;
+      if (menu) rightReserve = Math.ceil(menu.getBoundingClientRect().width) + 12;
+
+      // Respect main's horizontal padding: 10px left + 10px right = 20
+      vid.style.maxWidth = 'calc(100vw - ' + (20 + rightReserve) + 'px)';
+    }
+
+    // Init + lifecycle
+    fit();
+    window.addEventListener('load', fit);
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', fit);
+    window.addEventListener('pageshow', fit);
+    vid.addEventListener('loadedmetadata', fit);
+
+    // Footer year
+    var y = document.getElementById('y');
+    if (y) y.textContent = new Date().getFullYear();
+  })();
+  </script>
+</body>
+</html>
