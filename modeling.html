@@ -32,26 +32,68 @@
     const $g = document.getElementById('gallery');
     if (!$g) return;
 
-    // Center image in the gallery and fix height to visible viewport minus header/footer/padding
+    // Build one centered image (keeps aspect ratio)
     $g.style.display = 'flex';
     $g.style.alignItems = 'center';
     $g.style.justifyContent = 'center';
 
-    // Header: 68px, Footer: 40px, Main padding: 10px top + 10px bottom = 20px → total 128px
-    const unit = CSS.supports('height', '100svh') ? '100svh' : '100dvh';
-    $g.style.height = `calc(${unit} - 128px)`;
-
-    // Single scaled image (keeps aspect ratio, no scroll)
     const img = new Image();
     img.alt = '';
-    img.src = '/testing-portfolio/images/FK6A9868.JPG';
-    img.style.maxWidth  = 'calc(100vw - 20px)'; // 20px = main horizontal padding (10+10)
-    img.style.maxHeight = '100%';
-    img.style.width = 'auto';
+    img.src = '/testing-portfolio/images/FK6A9868.JPG'; // exact path & case
     img.style.height = 'auto';
-    img.style.display = 'block';
+    img.style.width  = 'auto';
+    img.style.maxHeight = '100%';
+    // maxWidth will be set dynamically so it never sits under the right menu
     $g.appendChild(img);
 
+    function vpad(el){
+      const cs = getComputedStyle(el);
+      return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
+    }
+
+    function fit() {
+      // 1) Use the "small" or "dynamic" viewport height so phones account for toolbars
+      const unitOK = CSS.supports && (CSS.supports('height', '100svh') || CSS.supports('height', '100dvh'));
+      document.body.style.height = unitOK ? '100svh' : '100dvh'; // overrides global 100vh for this page
+
+      const header = document.querySelector('header');
+      const footer = document.querySelector('footer');
+      const main   = document.querySelector('main');
+      const menu   = document.querySelector('.side-links');
+
+      const viewportH = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+      const headerH   = header ? header.getBoundingClientRect().height : 0;
+      const footerH   = footer ? footer.getBoundingClientRect().height : 0;
+      const mainPadV  = main ? vpad(main) : 0;
+
+      // 2) Height available for the image (no scroll)
+      const h = Math.max(0, viewportH - headerH - footerH - mainPadV);
+      $g.style.height = h + 'px';
+
+      // 3) Reserve horizontal space for the right-side menu so the image doesn't sit under it
+      const menuW = menu ? Math.ceil(menu.getBoundingClientRect().width) : 0;
+      // main has ~10px left+right padding total 20; subtract menu width + a little breathing room
+      const sideMargin = 20 + (menuW ? menuW + 12 : 0);
+      img.style.maxWidth = `calc(100vw - ${sideMargin}px)`;
+    }
+
+    // Run at key lifecycle moments
+    fit();
+    window.addEventListener('load', fit, { once: true });
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', fit);
+    window.addEventListener('pageshow', fit);
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
+    img.addEventListener('load', fit);
+
+    // Refit if header/footer size changes (text wraps, zoom, etc.)
+    const ro = new ResizeObserver(fit);
+    const header = document.querySelector('header');
+    const footer = document.querySelector('footer');
+    if (header) ro.observe(header);
+    if (footer) ro.observe(footer);
+
+    // Footer year
     const y = document.getElementById('y');
     if (y) y.textContent = new Date().getFullYear();
   })();
