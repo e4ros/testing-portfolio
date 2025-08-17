@@ -7,24 +7,22 @@
   <meta name="color-scheme" content="light dark" />
   <link rel="stylesheet" href="style.css">
 
-  <!-- page-local styles for the slider controls only -->
+  <!-- minimal, page-local styles for plain-text slider controls -->
   <style>
     .slider-controls{
-      position:absolute; left:50%; bottom:10px; transform:translateX(-50%);
+      position:absolute; top:10px; left:12px; transform:none;
       display:flex; align-items:center; gap:10px;
-      padding:6px 10px; border-radius:999px;
-      background: color-mix(in oklab, var(--bg, #fff) 85%, transparent);
-      border:1px solid var(--line, #e7e7e7);
-      font: 14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      user-select:none;
-      z-index: 5;
+      padding:0; border:none; background:transparent;
+      font:14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      user-select:none; z-index:5;
+      color:inherit;
     }
     .slider-btn{
-      appearance:none; background:transparent; border:0; padding:2px 6px;
-      font: 18px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      cursor:pointer;
+      appearance:none; background:transparent; border:0; padding:0 6px;
+      font:18px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      cursor:pointer; color:inherit;
     }
-    .slider-btn:disabled{ opacity:.4; cursor:default }
+    .slider-btn:disabled{ opacity:.35; cursor:default }
     .slider-count{ min-width:64px; text-align:center }
   </style>
 </head>
@@ -53,7 +51,7 @@
     const $g = document.getElementById('gallery');
     if (!$g) return;
 
-    // Make the gallery the positioning context for the slider controls
+    // Positioning context for controls
     $g.style.position = 'relative';
 
     // Center image in the gallery and fix height to visible viewport minus header/footer/padding
@@ -62,10 +60,10 @@
     $g.style.justifyContent = 'center';
 
     // Header: 68px, Footer: 40px, Main padding: 10px top + 10px bottom = 20px → total 128px
-    const unit = (window.CSS && CSS.supports && CSS.supports('height', '100svh')) ? '100svh' : '100dvh';
+    const unit = (window.CSS && CSS.supports && CSS.supports('height','100svh')) ? '100svh' : '100dvh';
     $g.style.height = `calc(${unit} - 128px)`;
 
-    // ---------- YOUR IMAGES ----------
+    // ---------- IMAGES (first one removed) ----------
     const IMAGES = [
       '/testing-portfolio/images/FK6A9835_VSCO.JPG',
       '/testing-portfolio/images/FK6A9859_VSCO.JPG',
@@ -78,7 +76,7 @@
     ];
     let index = 0;
 
-    // Single <img> reused for fast swaps (keep aspect ratio, centered)
+    // Single <img> reused (keep aspect, centered)
     const img = new Image();
     img.alt = '';
     img.style.maxWidth  = 'calc(100vw - 20px)'; // 20px = main horizontal padding (10+10)
@@ -88,7 +86,7 @@
     img.style.display = 'block';
     $g.appendChild(img);
 
-    // Slider controls: < 1/N >
+    // Plain-text slider controls, offset in the top-left
     const controls = document.createElement('div');
     controls.className = 'slider-controls';
     controls.innerHTML = `
@@ -98,8 +96,8 @@
     `;
     $g.appendChild(controls);
 
-    const $prev = controls.querySelector('#prevBtn');
-    const $next = controls.querySelector('#nextBtn');
+    const $prev  = controls.querySelector('#prevBtn');
+    const $next  = controls.querySelector('#nextBtn');
     const $count = controls.querySelector('#count');
 
     function vpad(el){
@@ -108,69 +106,10 @@
     }
 
     function fit() {
-      // Use the visible viewport height so phones account for toolbars
+      // Use visible viewport height on phones
       const viewportH = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
       const header = document.querySelector('header');
       const footer = document.querySelector('footer');
       const main   = document.querySelector('main');
 
-      const h = Math.max(0, viewportH - (header?.offsetHeight||0) - (footer?.offsetHeight||0) - (main ? vpad(main) : 0));
-      $g.style.height = h + 'px';
-
-      // Reserve horizontal space for the right-side menu so the image doesn't sit under it
-      const menu = document.querySelector('.side-links');
-      const menuW = menu ? Math.ceil(menu.getBoundingClientRect().width) : 0;
-      const sideMargin = 20 + (menuW ? menuW + 12 : 0); // main padding 20 + menu + breathing room
-      img.style.maxWidth = `calc(100vw - ${sideMargin}px)`;
-    }
-
-    function updateButtons() {
-      const total = IMAGES.length;
-      $count.textContent = `${index + 1}/${total}`;
-      $prev.disabled = (total <= 1) || (index === 0);
-      $next.disabled = (total <= 1) || (index === total - 1);
-    }
-
-    function show(i){
-      index = Math.max(0, Math.min(IMAGES.length - 1, i));
-      img.src = IMAGES[index];
-      updateButtons();
-    }
-
-    // Wire up controls
-    $prev.addEventListener('click', () => show(index - 1));
-    $next.addEventListener('click', () => show(index + 1));
-    window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowLeft')  show(index - 1);
-      if (e.key === 'ArrowRight') show(index + 1);
-    });
-
-    // Initial render
-    show(0);
-
-    // Run at key lifecycle moments
-    fit();
-    window.addEventListener('load', fit, { once: true });
-    window.addEventListener('resize', fit);
-    window.addEventListener('orientationchange', fit);
-    window.addEventListener('pageshow', fit);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
-    img.addEventListener('load', fit);
-
-    // Refit if header/footer size changes (text wraps, zoom, etc.)
-    const ro = new ResizeObserver(fit);
-    const header = document.querySelector('header');
-    const footer = document.querySelector('footer');
-    if (header) ro.observe(header);
-    if (footer) ro.observe(footer);
-
-    // Footer year
-    const y = document.getElementById('y');
-    if (y) y.textContent = new Date().getFullYear();
-
-    // Keep footer visible on mobile (override global 100vh only for this page)
-    document.body.style.height = (window.CSS && CSS.supports && CSS.supports('height','100svh')) ? '100svh' : '100dvh';
-  })();
-  </script>
-</body>
-</html>
+      const h = Math.max(0, viewportH - (header?.offsetHeight||0) - (footer?.offsetHeigh
