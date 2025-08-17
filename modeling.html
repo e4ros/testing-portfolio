@@ -32,28 +32,26 @@
     const $g = document.getElementById('gallery');
     if (!$g) return;
 
-    // Center the image inside the gallery and give the gallery a fixed viewport-based height
-    // Header: 68px, Footer: 40px, Main padding: 10px top + 10px bottom = 20px → total 128px
+    // Center image in the gallery and fix height to visible viewport minus header/footer/padding
     $g.style.display = 'flex';
     $g.style.alignItems = 'center';
     $g.style.justifyContent = 'center';
-    $g.style.height = 'calc(100dvh - 128px)'; // dynamic viewport height => no manual resize needed
 
-    // Build a single image that scales to fit while keeping aspect ratio
+    // Header: 68px, Footer: 40px, Main padding: 10px top + 10px bottom = 20px → total 128px
+    const unit = CSS.supports('height', '100svh') ? '100svh' : '100dvh';
+    $g.style.height = `calc(${unit} - 128px)`;
+
+    // Single scaled image (keeps aspect ratio, no scroll)
     const img = new Image();
     img.alt = '';
-    img.src = '/testing-portfolio/images/FK6A9868.JPG'; // exact path & case
-
-    // Fit within available space; no scroll; preserve aspect ratio
-    img.style.maxWidth  = 'calc(100vw - 20px)'; // 20px = main left+right padding (10+10)
+    img.src = '/testing-portfolio/images/FK6A9868.JPG';
+    img.style.maxWidth  = 'calc(100vw - 20px)'; // 20px = main horizontal padding (10+10)
     img.style.maxHeight = '100%';
-    img.style.width  = 'auto';
+    img.style.width = 'auto';
     img.style.height = 'auto';
     img.style.display = 'block';
-
     $g.appendChild(img);
 
-    // Footer year
     const y = document.getElementById('y');
     if (y) y.textContent = new Date().getFullYear();
   })();
