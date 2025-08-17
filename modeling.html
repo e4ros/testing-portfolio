@@ -10,14 +10,13 @@
   <!-- minimal, page-local styles for plain-text slider controls -->
   <style>
     .slider-controls{
-      position:absolute; /* placed into the left gutter by script */
-      left:10px;
-      top:10px;
+      position:fixed;          /* outside the gallery; positioned via JS next to image */
       display:flex; align-items:center; gap:10px;
       padding:0; border:none; background:transparent;
       font:14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      user-select:none; z-index:5; color:inherit;
+      user-select:none; color:inherit; z-index:5;
       white-space:nowrap;
+      left:8px; top:8px;       /* initial safe spot; JS repositions after first paint */
     }
     .slider-btn{
       appearance:none; background:transparent; border:0; padding:0 6px;
@@ -53,7 +52,7 @@
     var g = document.getElementById('gallery');
     if (!g) return;
 
-    // Positioning context for controls + center image
+    // Positioning context + centered image
     g.style.position = 'relative';
     g.style.display = 'flex';
     g.style.alignItems = 'center';
@@ -81,14 +80,14 @@
     img.style.display = 'block';
     g.appendChild(img);
 
-    // Plain-text slider controls (will be placed into left gutter)
+    // Plain-text slider controls, added to BODY so they can live outside the gallery
     var controls = document.createElement('div');
     controls.className = 'slider-controls';
     controls.innerHTML =
       '<button class="slider-btn" id="prevBtn" aria-label="Previous">&lt;</button>' +
       '<span class="slider-count" id="count">1/' + IMAGES.length + '</span>' +
       '<button class="slider-btn" id="nextBtn" aria-label="Next">&gt;</button>';
-    g.appendChild(controls);
+    document.body.appendChild(controls);
 
     var prevBtn = controls.querySelector('#prevBtn');
     var nextBtn = controls.querySelector('#nextBtn');
@@ -101,7 +100,7 @@
       return pt + pb;
     }
 
-    // Reserve space: left gutter for controls, right gutter for side menu
+    // Size gallery to visible viewport; keep footer visible; account for right menu on desktop
     function fit(){
       var vh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
       var header = document.querySelector('header');
@@ -117,22 +116,40 @@
       var h = Math.max(0, vh - headerH - footerH - mainPad);
       g.style.height = h + 'px';
 
-      // Measure gutters we need to reserve
+      // Right gutter for menu so image doesn't sit under it (desktop)
       var rightReserve = 0;
-      if (menu) {
-        rightReserve = Math.ceil(menu.getBoundingClientRect().width) + 12; // menu width + breathing
-      }
-
-      var leftReserve = Math.ceil(controls.offsetWidth) + 16; // controls width + breathing
+      if (menu) rightReserve = Math.ceil(menu.getBoundingClientRect().width) + 12;
 
       // Respect main's horizontal padding 10px+10px = 20px
-      img.style.maxWidth = 'calc(100vw - ' + (20 + leftReserve + rightReserve) + 'px)';
+      img.style.maxWidth = 'calc(100vw - ' + (20 + rightReserve) + 'px)';
 
-      // Vertically center controls within gallery; stick to left edge (10px)
-      var controlsH = controls.offsetHeight;
-      var topPos = Math.max(10, Math.round((g.clientHeight - controlsH) / 2));
-      controls.style.top = topPos + 'px';
-      controls.style.left = '10px';
+      // Then place the controls next to (outside) the image
+      placeControls();
+    }
+
+    function placeControls(){
+      // Compute a position to the LEFT of the image's bounding rect, not overlapping it
+      var rect = img.getBoundingClientRect();
+      var cw = controls.offsetWidth;
+      var ch = controls.offsetHeight;
+
+      // Target left: 12px to the left of the image rectangle
+      var left = Math.round(rect.left) - cw - 12;
+      // Vertically centered on the image
+      var top  = Math.round(rect.top + rect.height / 2 - ch / 2);
+
+      // Keep within viewport with safe margins
+      if (left < 8) left = 8;
+      top = Math.max(8, Math.min((window.innerHeight - ch - 8), top));
+
+      // If this still overlaps (e.g., image flush to left), place controls ABOVE the image instead
+      if (left + cw > rect.left - 4) {
+        left = Math.round(rect.left + (rect.width - cw) / 2);
+        top  = Math.max(8, Math.round(rect.top - ch - 8));
+      }
+
+      controls.style.left = left + 'px';
+      controls.style.top  = top  + 'px';
     }
 
     function updateButtons(){
@@ -140,14 +157,17 @@
       countEl.textContent = (index + 1) + '/' + total;
       prevBtn.disabled = (total <= 1) || (index === 0);
       nextBtn.disabled = (total <= 1) || (index === total - 1);
+      // Reposition in case the counter width changed
+      placeControls();
     }
+
     function show(i){
       if (IMAGES.length === 0) return;
       index = Math.max(0, Math.min(IMAGES.length - 1, i));
       img.src = IMAGES[index];
       updateButtons();
-      // After image swap, refit in case intrinsic ratio changes layout
-      setTimeout(fit, 0);
+      // After image swap, re-place once it paints
+      setTimeout(placeControls, 0);
     }
 
     // Wire up controls + keyboard
@@ -164,10 +184,10 @@
 
     // Recalculate on common events
     window.addEventListener('load', fit);
-    window.addEventListener('resize', fit);
-    window.addEventListener('orientationchange', fit);
-    window.addEventListener('pageshow', fit);
-    img.addEventListener('load', fit);
+    window.addEventListener('resize', function(){ fit(); placeControls(); });
+    window.addEventListener('orientationchange', function(){ fit(); placeControls(); });
+    window.addEventListener('pageshow', function(){ fit(); placeControls(); });
+    img.addEventListener('load', function(){ fit(); placeControls(); });
 
     // Footer year
     var y = document.getElementById('y');
