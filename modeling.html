@@ -7,40 +7,187 @@
   <meta name="color-scheme" content="light dark" />
   <link rel="stylesheet" href="style.css">
 
-  <!-- Mobile-only menu tweaks (desktop unaffected) -->
+  <!-- Mobile-only menu tweaks; desktop unaffected -->
   <style>
-    /* hidden by default (desktop); shown on small screens */
+    /* hidden by default; shown on small screens */
     .menu-trigger{ display:none; }
 
     @media (max-width: 640px){
       /* hide the fixed right-side menu on mobile */
       body.modeling .side-links{ display:none; }
 
-      /* use the header as a flex row and bottom-align both title and trigger */
+      /* use header as a flex row and bottom-align title + trigger */
       body.modeling header{
-        position:relative;             /* keep your header behavior */
-        display:flex;                   /* already flex in your CSS; reiterate locally */
-        align-items:flex-end;           /* <-- bottom-align children */
-        padding-right:12px;             /* room for the trigger edge */
+        position:relative;
+        display:flex;                /* header is flex already in your CSS; reinforce here */
+        align-items:flex-end;        /* bottom-align children */
+        padding-right:40px;          /* room for the trigger's tap target */
       }
-
-      /* tighten the title's line box a touch so baselines match neatly */
       body.modeling header .title{
         line-height:1;
-        padding-bottom:2px;             /* tiny nudge for visual baseline harmony */
+        padding-bottom:2px;          /* tiny nudge for visual baseline harmony */
       }
 
-      /* show a minimal "..." trigger; right aligned via margin-left:auto */
+      /* show a minimal "..." trigger in the header, right-aligned */
       .menu-trigger{
         display:block;
-        position:static;                /* <-- participate in header flex layout */
-        margin-left:auto;               /* push to the right edge */
+        position:absolute;
+        right:12px;
+        bottom:10px;                 /* tune if you want it one pixel higher/lower */
         background:transparent;
         border:0;
-        padding:0 6px 2px;              /* tiny bottom pad to match title baseline */
-        font:700 20px/1 var(--mono, ui-monospace);
-        color:var(--fg, #0b0b0b);
+        padding:4px 6px;
+        font:700 20px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        color:inherit;
         cursor:pointer;
         user-select:none;
       }
       .menu-trigger:focus-visible{
+        outline:2px solid rgba(0,0,0,.35);
+        outline-offset:2px;
+        border-radius:6px;
+      }
+
+      /* centered modal menu */
+      .menu-overlay{
+        position:fixed; inset:0;
+        display:none;                /* toggled by JS */
+        align-items:center; justify-content:center;
+        background:rgba(0,0,0,.35);
+        z-index:9999;
+      }
+      .menu-overlay.open{ display:flex; }
+
+      .menu-sheet{
+        background:rgba(255,255,255,.96);
+        border-radius:12px;
+        padding:18px 20px;
+        min-width:min(92vw, 440px);
+        text-align:center;
+      }
+      .menu-sheet a{
+        display:block;
+        padding:10px 12px;
+        text-decoration:none;
+        font-weight:600;
+      }
+      .menu-sheet a:hover{ text-decoration:underline; }
+      .menu-back{
+        margin-top:6px;
+        font:12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        color:#777;
+        text-decoration:none;
+        display:inline-block;
+      }
+      .menu-back:hover{ text-decoration:underline; }
+    }
+  </style>
+</head>
+<body class="modeling">
+  <header>
+    <div class="title">Ethan Granat</div>
+    <!-- mobile-only "…" trigger (bottom-aligned with title) -->
+    <button class="menu-trigger" type="button" aria-haspopup="dialog" aria-controls="mobileMenu" aria-expanded="false" aria-label="Open menu">…</button>
+  </header>
+
+  <!-- fixed side menu (desktop only; hidden by mobile CSS) -->
+  <nav class="side-links" aria-label="Site links">
+    <a href="modeling.html" aria-current="page">Modeling</a>
+    <a href="news.html">News</a>
+    <a href="index.html">Projects</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
+  <main>
+    <div class="gallery" id="gallery" aria-label="Modeling Gallery"></div>
+  </main>
+
+  <footer>© <span id="y"></span> Ethan</footer>
+
+  <!-- mobile menu overlay -->
+  <div class="menu-overlay" id="mobileMenu" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Menu">
+    <div class="menu-sheet">
+      <a href="modeling.html" aria-current="page">Modeling</a>
+      <a href="news.html">News</a>
+      <a href="index.html">Projects</a>
+      <a href="about.html">About</a>
+      <a href="contact.html">Contact</a>
+      <a href="#" class="menu-back" id="menuBackBtn">← Back</a>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    /* --- Centered, scaled image (no scroll) --- */
+    const g = document.getElementById('gallery');
+    if (!g) return;
+
+    g.style.display = 'flex';
+    g.style.alignItems = 'center';
+    g.style.justifyContent = 'center';
+
+    const img = new Image();
+    img.alt = '';
+    img.src = '/testing-portfolio/images/FK6A9868.JPG';
+    img.style.maxWidth  = 'calc(100vw - 20px)';  // respect main’s 10px + 10px padding
+    img.style.maxHeight = '100%';
+    img.style.width = 'auto';
+    img.style.height = 'auto';
+    img.style.display = 'block';
+    g.appendChild(img);
+
+    function vpad(el){
+      const cs = getComputedStyle(el);
+      return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
+    }
+    function fit(){
+      // Use the visible viewport height to keep footer visible on phones
+      const vh = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+      const header = document.querySelector('header');
+      const footer = document.querySelector('footer');
+      const main   = document.querySelector('main');
+      const h = Math.max(0, vh - (header?.offsetHeight||0) - (footer?.offsetHeight||0) - (main ? vpad(main) : 0));
+      g.style.height = h + 'px';
+      document.body.style.height = vh + 'px'; // override global 100vh only for this page
+    }
+
+    // Run at key lifecycle moments
+    fit();
+    window.addEventListener('load', fit);
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', fit);
+    window.addEventListener('pageshow', fit);
+    img.addEventListener('load', fit);
+
+    // --- Mobile menu open/close ---
+    const trigger = document.querySelector('.menu-trigger');
+    const overlay = document.getElementById('mobileMenu');
+    const backBtn = document.getElementById('menuBackBtn');
+
+    function openMenu(){
+      overlay.classList.add('open');
+      trigger.setAttribute('aria-expanded','true');
+      const firstLink = overlay.querySelector('a');
+      if (firstLink) firstLink.focus();
+    }
+    function closeMenu(){
+      overlay.classList.remove('open');
+      trigger.setAttribute('aria-expanded','false');
+      trigger.focus();
+    }
+
+    if (trigger){
+      trigger.addEventListener('click', openMenu);
+      backBtn.addEventListener('click', (e)=>{ e.preventDefault(); closeMenu(); });
+      overlay.addEventListener('click', (e)=>{ if (e.target === overlay) closeMenu(); });
+      window.addEventListener('keydown', (e)=>{ if (e.key === 'Escape' && overlay.classList.contains('open')) closeMenu(); });
+    }
+
+    // Footer year
+    const y = document.getElementById('y');
+    if (y) y.textContent = new Date().getFullYear();
+  })();
+  </script>
+</body>
+</html>
