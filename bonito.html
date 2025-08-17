@@ -7,13 +7,17 @@
   <meta name="color-scheme" content="light dark" />
   <link rel="stylesheet" href="style.css">
   <style>
-    /* tiny, page-local style just for the IG link */
-    .ext-link {
-      position:absolute; left:12px; top:10px;
-      font:12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      color: var(--muted, #777); text-decoration: none;
+    /* Only for this page’s simple vertical stack */
+    .stack{
+      display:flex; flex-direction:column; align-items:center;
+      gap:12px; width:100%;
     }
-    .ext-link:hover { text-decoration: underline; color: inherit; }
+    .ig-link{
+      font:12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: var(--muted, #777); text-decoration:none;
+      position: relative; z-index: 2; /* ensure above the video’s control bar area */
+    }
+    .ig-link:hover{ text-decoration:underline; color:inherit; }
   </style>
 </head>
 <body class="bonito">
@@ -21,7 +25,7 @@
     <div class="title">Ethan Granat</div>
   </header>
 
-  <!-- fixed side menu (make sure this appears on your other pages too) -->
+  <!-- right-side fixed menu -->
   <nav class="side-links" aria-label="Site links">
     <a href="modeling.html">Modeling</a>
     <a href="news.html">News</a>
@@ -42,32 +46,38 @@
     var g = document.getElementById('gallery');
     if (!g) return;
 
-    // center content in the gallery
-    g.style.position = 'relative';
+    // Center content and stack video + link
     g.style.display = 'flex';
     g.style.alignItems = 'center';
     g.style.justifyContent = 'center';
+    g.style.position = 'relative';
 
-    // Instagram link
-    var link = document.createElement('a');
-    link.className = 'ext-link';
-    link.href = 'https://www.instagram.com/reel/DFdfDSjPm6w/';
-    link.target = '_blank';
-    link.rel = 'noopener';
-    link.textContent = 'View on Instagram →';
-    g.appendChild(link);
+    var stack = document.createElement('div');
+    stack.className = 'stack';
+    g.appendChild(stack);
 
-    // Video (must exist at /videos/bonitov5.mp4 in your repo)
+    // Video (GitHub Pages path)
     var vid = document.createElement('video');
     vid.controls = true;
     vid.playsInline = true;
     vid.preload = 'metadata';
     vid.src = '/testing-portfolio/videos/bonitov5.mp4';
-    vid.style.maxHeight = '100%';
-    vid.style.width = 'auto';
-    vid.style.height = 'auto';
     vid.style.display = 'block';
-    g.appendChild(vid);
+    vid.style.width = 'auto';
+    vid.style.maxWidth = '100%'; // further constrained by JS for right menu
+    vid.style.height = 'auto';
+    vid.style.maxHeight = '100%'; // capped by JS to leave space for link
+    vid.style.pointerEvents = 'auto';
+    stack.appendChild(vid);
+
+    // Instagram link BELOW the video (on whitespace, clickable)
+    var link = document.createElement('a');
+    link.className = 'ig-link';
+    link.href = 'https://www.instagram.com/reel/DFdfDSjPm6w/';
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = 'View on Instagram →';
+    stack.appendChild(link);
 
     function vpad(el){
       var cs = window.getComputedStyle ? getComputedStyle(el) : el.currentStyle;
@@ -75,8 +85,8 @@
     }
 
     function fit(){
-      // height between header and footer (no page scroll)
-      var vh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
+      // Height between header and footer (no page scroll)
+      var vh     = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
       var header = document.querySelector('header');
       var footer = document.querySelector('footer');
       var main   = document.querySelector('main');
@@ -89,14 +99,24 @@
       var h = Math.max(0, vh - headerH - footerH - mainPad);
       g.style.height = h + 'px';
 
-      // keep video out from under right-side menu on desktop
+      // Keep the video out from under the right-side menu (desktop)
       var rightReserve = 0;
       if (menu) rightReserve = Math.ceil(menu.getBoundingClientRect().width) + 12;
 
-      // main has 10px left + 10px right padding = 20px
-      vid.style.maxWidth = 'calc(100vw - ' + (20 + rightReserve) + 'px)';
+      // Respect main's horizontal padding (10 + 10 = 20)
+      var maxW = 'calc(100vw - ' + (20 + rightReserve) + 'px)';
+      vid.style.maxWidth = maxW;
+
+      // Reserve space for the link so it sits fully below the video on whitespace
+      var linkH = link.offsetHeight || 18;
+      var GAP_TOP = 8;   // space above video (inside gallery)
+      var GAP_BETWEEN = 12; // matches .stack gap
+      var GAP_BOTTOM = 14;  // whitespace above footer
+      var usableForVideo = Math.max(120, h - (GAP_TOP + GAP_BETWEEN + linkH + GAP_BOTTOM));
+      vid.style.maxHeight = usableForVideo + 'px';
     }
 
+    // Init + lifecycle
     fit();
     window.addEventListener('load', fit);
     window.addEventListener('resize', fit);
@@ -104,6 +124,7 @@
     window.addEventListener('pageshow', fit);
     vid.addEventListener('loadedmetadata', fit);
 
+    // Footer year
     var y = document.getElementById('y');
     if (y) y.textContent = new Date().getFullYear();
   })();
