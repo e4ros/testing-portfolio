@@ -122,6 +122,15 @@
 <footer>© <span id="y"></span> Ethan</footer>
 
 <script>
+/* Compute the correct root for project sites:
+   "/" for user sites, "/<repo>/" for project sites, even if the page is in a subfolder */
+const BASE = (() => {
+  const parts = location.pathname.split('/').filter(Boolean);
+  // If it's a project site, parts[0] is the repo name
+  return parts.length ? `/${parts[0]}/` : '/';
+})();
+</script>
+
 const PROJECTS = [
   { title:"Microsite — On Borrowed Fabric", role:"Design · 2024", img:"images/project1.jpg", url:"#"},
   { title:"Composite I-Beam Study",        role:"Materials · 2023", img:"images/project2.jpg", url:"#"},
