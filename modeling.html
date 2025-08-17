@@ -12,6 +12,8 @@
     <div class="title">Ethan Granat</div>
   </header>
 
+  <!-- fixed side menu (matches other pages) -->
+  <!-- same fixed side menu -->
   <nav class="side-links" aria-label="Site links">
     <a href="modeling.html" aria-current="page">Modeling</a>
     <a href="#news">News</a>
@@ -27,27 +29,72 @@
   <footer>© <span id="y"></span> Ethan</footer>
 
   <script>
-  // 7 × 5 = 35 tiles; first tile is your image
+  // Compute a base path that works on both user sites and project sites
+  const BASE = (() => {
+    const parts = location.pathname.split('/').filter(Boolean);
+    // On project sites (username.github.io/repo/...), parts[0] is the repo name
+    return parts.length ? `/${parts[0]}/` : '/';
+  })();
+
+  // ---- 7 x 5 = 35 tiles ----
   const TOTAL_TILES = 35;
-  const IMAGES = [
-    'images/FK6A9868.JPG'
-    // add more like: 'images/another.JPG',
+
+  // Add your modeling images here (use the exact filename case from the repo)
+/* Compute the correct root for project sites:
+   "/" for user sites, "/<repo>/" for project sites, even if the page is in a subfolder */
+const BASE = (() => {
+  const parts = location.pathname.split('/').filter(Boolean);
+  // If it's a project site, parts[0] is the repo name
+  return parts.length ? `/${parts[0]}/` : '/';
+})();
+</script>
+
+  // 7 x 5 = 35 tiles (matches your homepage grid)
+  const MODELING = [
+    { img: `${BASE}images/FK6A9868.jpg` }, // your test image
+    // { img: `${BASE}images/another.jpg` },
+    // { img: `${BASE}images/third.JPG` },
+    { img:"images/FK6A9868.jpg" }, // your test image
+    // add more modeling images here as you like
   ];
 
   const $g = document.getElementById('gallery');
+  const total = 35;
+  const items = [...MODELING];
+  while (items.length < total) items.push(null);
+
+  // Build exactly 35 tiles; blanks show only the subtle background (no text)
   for (let i = 0; i < TOTAL_TILES; i++) {
+    const data = MODELING[i] ?? null;
     const el = document.createElement('div');
+  const $g = document.getElementById('gallery');
+  items.forEach(p => {
+    const el = document.createElement(p?.url ? 'a' : 'div');
     el.className = 'tile';
-    const src = IMAGES[i];
-    if (src) {
+
+    if (data?.img) {
       const img = new Image();
       img.alt = '';
-      img.src = src;
+      img.src = data.img;
+
+      // Simple .jpg ⇄ .JPG fallback if case doesn't match what’s in the repo
+      img.onerror = () => {
+        if (/\.jpg$/i.test(img.src)) {
+          img.onerror = null; // avoid loops
+          img.src = img.src.replace(/\.jpg$/i, '.JPG');
+        }
+      };
+
       el.appendChild(img);
     }
+
+    if (p?.url) { el.href = p.url; el.target = '_blank'; el.rel = 'noreferrer'; }
+    el.innerHTML = p?.img ? `<img src="${p.img}" alt="">` : '—';
     $g.appendChild(el);
   }
+  });
 
+  // Footer year
   document.getElementById('y').textContent = new Date().getFullYear();
   </script>
 </body>
