@@ -6,100 +6,13 @@
   <title>Modeling — Ethan Granat</title>
   <meta name="color-scheme" content="light dark" />
   <link rel="stylesheet" href="style.css">
-
-  <!-- Mobile-only: move the vertical menu to the upper-right (inside header area) -->
-  <!-- Mobile-only menu tweaks (desktop unaffected) -->
-  <style>
-    /* the trigger is hidden by default (desktop); shown on small screens */
-    .menu-trigger{ display:none; }
-
-    @media (max-width: 640px){
-      body.modeling .side-links{
-        top: 8px;               /* sit inside header area */
-        right: 10px;
-        transform: none;        /* no vertical centering */
-        flex-direction: row;    /* horizontal list */
-        align-items: center;
-        justify-content: flex-end;
-        gap: 10px;
-        white-space: nowrap;    /* keep on one line */
-        max-height: 48px;       /* stay within header; avoid overlap with image */
-        overflow-x: auto;       /* scroll just the menu if needed */
-        overflow-y: hidden;
-        scrollbar-width: none;  /* hide scrollbar (Firefox) */
-      /* hide the fixed right-side menu on mobile */
-      body.modeling .side-links{ display:none; }
-
-      /* show a minimal "..." trigger, top-right, visually bottom-aligned with header text */
-      .menu-trigger{
-        display:block;
-        position:absolute;
-        right:12px;
-        bottom:12px;            /* approximate baseline alignment with title */
-        background:transparent;
-        border:0;
-        padding:4px 8px;
-        font: 700 20px/1 var(--mono, ui-monospace);
-        color: var(--fg, #0b0b0b);
-        cursor:pointer;
-        user-select:none;
-      }
-      .menu-trigger:focus-visible{
-        outline:2px solid color-mix(in oklab, var(--fg, #0b0b0b) 40%, transparent);
-        outline-offset:2px;
-        border-radius:6px;
-      }
-
-      /* fullscreen modal overlay */
-      .menu-overlay{
-        position:fixed; inset:0;
-        display:none;            /* toggled by JS */
-        align-items:center; justify-content:center;
-        background:color-mix(in oklab, var(--bg, #fff) 30%, #0008);
-        z-index:9999;
-      }
-      .menu-overlay[aria-hidden="false"]{ display:flex; }
-
-      .menu-sheet{
-        background:color-mix(in oklab, var(--bg, #fff) 92%, transparent);
-        border:1px solid var(--line, #e7e7e7);
-        border-radius:12px;
-        padding:18px 20px;
-        min-width:min(92vw, 440px);
-        display:grid; gap:12px;
-        text-align:center;
-      }
-      .menu-sheet a{
-        display:block;
-        padding:8px 10px;
-        text-decoration:none;
-        font-weight:600;
-      }
-      .menu-sheet a:hover{
-        text-decoration:underline;
-      }
-      body.modeling .side-links::-webkit-scrollbar{ display: none; } /* hide (WebKit) */
-      body.modeling .side-links a{ font-size: 12px; } /* tuck links a bit on mobile */
-      .menu-back{
-        margin-top:6px;
-        font:12px var(--mono, ui-monospace);
-        color:var(--muted, #777);
-        text-decoration:none;
-      }
-      .menu-back:hover{ text-decoration:underline; }
-    }
-  </style>
 </head>
 <body class="modeling">
   <header>
-  <header style="position:relative">
     <div class="title">Ethan Granat</div>
-    <!-- mobile-only "..." trigger -->
-    <button class="menu-trigger" type="button" aria-haspopup="dialog" aria-controls="mobileMenu" aria-expanded="false" aria-label="Open menu">…</button>
   </header>
 
   <!-- fixed side menu -->
-  <!-- fixed side menu (desktop only; hidden by mobile CSS) -->
   <nav class="side-links" aria-label="Site links">
     <a href="modeling.html" aria-current="page">Modeling</a>
     <a href="news.html">News</a>
@@ -114,100 +27,86 @@
 
   <footer>© <span id="y"></span> Ethan</footer>
 
-  <!-- mobile menu overlay -->
-  <div class="menu-overlay" id="mobileMenu" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Menu">
-    <div class="menu-sheet">
-      <a href="modeling.html" aria-current="page">Modeling</a>
-      <a href="news.html">News</a>
-      <a href="index.html">Projects</a>
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
-      <a href="#" class="menu-back" id="menuBackBtn">← Back</a>
-    </div>
-  </div>
-
   <script>
   (function () {
     const $g = document.getElementById('gallery');
     if (!$g) return;
 
-    // Center the image; no padding hacks. Keep aspect ratio, no scroll.
-    /* --- Keep the centered, scaled image (no scroll) --- */
+    // Center image in the gallery and fix height to visible viewport minus header/footer/padding
+    // Build one centered image (keeps aspect ratio)
     $g.style.display = 'flex';
     $g.style.alignItems = 'center';
     $g.style.justifyContent = 'center';
 
-    // Header: 68px, Footer: 40px, Main padding: 10px + 10px = 20px → total 128px
-    const unit = (CSS && CSS.supports && CSS.supports('height','100svh')) ? '100svh' : '100dvh';
-    $g.style.height = `calc(${unit} - 128px)`; // fits visible viewport between header/footer
-    // Header 68 + Footer 40 + Main padding 20 = 128px total
+    // Header: 68px, Footer: 40px, Main padding: 10px top + 10px bottom = 20px → total 128px
+    const unit = CSS.supports('height', '100svh') ? '100svh' : '100dvh';
     $g.style.height = `calc(${unit} - 128px)`;
 
+    // Single scaled image (keeps aspect ratio, no scroll)
     const img = new Image();
     img.alt = '';
-    img.src = '/testing-portfolio/images/FK6A9868.JPG'; // exact path & case
-
-    // Scale to fit; maintain aspect; keep centered
-    img.style.maxWidth  = 'calc(100vw - 20px)'; // respects main's horizontal padding
     img.src = '/testing-portfolio/images/FK6A9868.JPG';
-    img.style.maxWidth  = 'calc(100vw - 20px)'; // respect main’s left+right padding
+    img.style.maxWidth  = 'calc(100vw - 20px)'; // 20px = main horizontal padding (10+10)
     img.style.maxHeight = '100%';
-    img.style.width  = 'auto';
+    img.style.width = 'auto';
+    img.src = '/testing-portfolio/images/FK6A9868.JPG'; // exact path & case
     img.style.height = 'auto';
     img.style.display = 'block';
-
+    img.style.width  = 'auto';
+    img.style.maxHeight = '100%';
+    // maxWidth will be set dynamically so it never sits under the right menu
     $g.appendChild(img);
 
-    // Ensure footer year
-    const y = document.getElementById('y');
-    if (y) y.textContent = new Date().getFullYear();
-
-    // Keep footer visible on mobile (override global 100vh only on this page)
-    // Ensure full-viewport body height on mobile for visible footer
-    document.body.style.height = (CSS && CSS.supports && CSS.supports('height','100svh')) ? '100svh' : '100dvh';
-
-    // Re-apply sizing on common events
-    /* --- Mobile menu: "…" trigger opens centered overlay --- */
-    const trigger = document.querySelector('.menu-trigger');
-    const overlay = document.getElementById('mobileMenu');
-    const backBtn = document.getElementById('menuBackBtn');
-
-    function openMenu(){
-      overlay.setAttribute('aria-hidden','false');
-      trigger.setAttribute('aria-expanded','true');
-      // focus the first link for accessibility
-      const firstLink = overlay.querySelector('a');
-      if (firstLink) firstLink.focus();
-    }
-    function closeMenu(){
-      overlay.setAttribute('aria-hidden','true');
-      trigger.setAttribute('aria-expanded','false');
-      trigger.focus();
+    function vpad(el){
+      const cs = getComputedStyle(el);
+      return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
     }
 
-    // Only active on small screens (trigger is hidden on desktop)
-    trigger.addEventListener('click', openMenu);
-    backBtn.addEventListener('click', function(e){ e.preventDefault(); closeMenu(); });
-    overlay.addEventListener('click', function(e){
-      // click outside the menu-sheet closes
-      if (e.target === overlay) closeMenu();
-    });
-    window.addEventListener('keydown', function(e){
-      if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') closeMenu();
-    });
+    function fit() {
+      // 1) Use the "small" or "dynamic" viewport height so phones account for toolbars
+      const unitOK = CSS.supports && (CSS.supports('height', '100svh') || CSS.supports('height', '100dvh'));
+      document.body.style.height = unitOK ? '100svh' : '100dvh'; // overrides global 100vh for this page
 
-    // Re-apply sizing on orientation/resize/etc.
-    function fit(){
-      $g.style.height = `calc(${(CSS && CSS.supports && CSS.supports('height','100svh')) ? '100svh' : '100dvh'} - 128px)`;
-      const unitNow = (CSS && CSS.supports && CSS.supports('height','100svh')) ? '100svh' : '100dvh';
-      $g.style.height = `calc(${unitNow} - 128px)`;
-      document.body.style.height = unitNow;
+      const header = document.querySelector('header');
+      const footer = document.querySelector('footer');
+      const main   = document.querySelector('main');
+      const menu   = document.querySelector('.side-links');
+
+      const viewportH = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+      const headerH   = header ? header.getBoundingClientRect().height : 0;
+      const footerH   = footer ? footer.getBoundingClientRect().height : 0;
+      const mainPadV  = main ? vpad(main) : 0;
+
+      // 2) Height available for the image (no scroll)
+      const h = Math.max(0, viewportH - headerH - footerH - mainPadV);
+      $g.style.height = h + 'px';
+
+      // 3) Reserve horizontal space for the right-side menu so the image doesn't sit under it
+      const menuW = menu ? Math.ceil(menu.getBoundingClientRect().width) : 0;
+      // main has ~10px left+right padding total 20; subtract menu width + a little breathing room
+      const sideMargin = 20 + (menuW ? menuW + 12 : 0);
+      img.style.maxWidth = `calc(100vw - ${sideMargin}px)`;
     }
-    window.addEventListener('orientationchange', fit);
+
+    // Run at key lifecycle moments
+    fit();
+    window.addEventListener('load', fit, { once: true });
     window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', fit);
     window.addEventListener('pageshow', fit);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
     img.addEventListener('load', fit);
+
+    // Refit if header/footer size changes (text wraps, zoom, etc.)
+    const ro = new ResizeObserver(fit);
+    const header = document.querySelector('header');
+    const footer = document.querySelector('footer');
+    if (header) ro.observe(header);
+    if (footer) ro.observe(footer);
+
+    // Footer year
+    const y = document.getElementById('y');
+    if (y) y.textContent = new Date().getFullYear();
   })();
   </script>
 </body>
