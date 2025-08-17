@@ -9,176 +9,38 @@
 
   <!-- Mobile-only menu tweaks (desktop unaffected) -->
   <style>
-    /* the trigger is hidden by default (desktop); shown on small screens */
+    /* hidden by default (desktop); shown on small screens */
     .menu-trigger{ display:none; }
 
     @media (max-width: 640px){
       /* hide the fixed right-side menu on mobile */
       body.modeling .side-links{ display:none; }
 
-      /* show a minimal "..." trigger, top-right, visually bottom-aligned with header text */
+      /* use the header as a flex row and bottom-align both title and trigger */
+      body.modeling header{
+        position:relative;             /* keep your header behavior */
+        display:flex;                   /* already flex in your CSS; reiterate locally */
+        align-items:flex-end;           /* <-- bottom-align children */
+        padding-right:12px;             /* room for the trigger edge */
+      }
+
+      /* tighten the title's line box a touch so baselines match neatly */
+      body.modeling header .title{
+        line-height:1;
+        padding-bottom:2px;             /* tiny nudge for visual baseline harmony */
+      }
+
+      /* show a minimal "..." trigger; right aligned via margin-left:auto */
       .menu-trigger{
         display:block;
-        position:absolute;
-        right:12px;
-        bottom:12px;            /* approximate baseline alignment with title */
+        position:static;                /* <-- participate in header flex layout */
+        margin-left:auto;               /* push to the right edge */
         background:transparent;
         border:0;
-        padding:4px 8px;
-        font: 700 20px/1 var(--mono, ui-monospace);
-        color: var(--fg, #0b0b0b);
+        padding:0 6px 2px;              /* tiny bottom pad to match title baseline */
+        font:700 20px/1 var(--mono, ui-monospace);
+        color:var(--fg, #0b0b0b);
         cursor:pointer;
         user-select:none;
       }
       .menu-trigger:focus-visible{
-        outline:2px solid color-mix(in oklab, var(--fg, #0b0b0b) 40%, transparent);
-        outline-offset:2px;
-        border-radius:6px;
-      }
-
-      /* fullscreen modal overlay */
-      .menu-overlay{
-        position:fixed; inset:0;
-        display:none;            /* toggled by JS */
-        align-items:center; justify-content:center;
-        background:color-mix(in oklab, var(--bg, #fff) 30%, #0008);
-        z-index:9999;
-      }
-      .menu-overlay[aria-hidden="false"]{ display:flex; }
-
-      .menu-sheet{
-        background:color-mix(in oklab, var(--bg, #fff) 92%, transparent);
-        border:1px solid var(--line, #e7e7e7);
-        border-radius:12px;
-        padding:18px 20px;
-        min-width:min(92vw, 440px);
-        display:grid; gap:12px;
-        text-align:center;
-      }
-      .menu-sheet a{
-        display:block;
-        padding:8px 10px;
-        text-decoration:none;
-        font-weight:600;
-      }
-      .menu-sheet a:hover{
-        text-decoration:underline;
-      }
-      .menu-back{
-        margin-top:6px;
-        font:12px var(--mono, ui-monospace);
-        color:var(--muted, #777);
-        text-decoration:none;
-      }
-      .menu-back:hover{ text-decoration:underline; }
-    }
-  </style>
-</head>
-<body class="modeling">
-  <header style="position:relative">
-    <div class="title">Ethan Granat</div>
-    <!-- mobile-only "..." trigger -->
-    <button class="menu-trigger" type="button" aria-haspopup="dialog" aria-controls="mobileMenu" aria-expanded="false" aria-label="Open menu">…</button>
-  </header>
-
-  <!-- fixed side menu (desktop only; hidden by mobile CSS) -->
-  <nav class="side-links" aria-label="Site links">
-    <a href="modeling.html" aria-current="page">Modeling</a>
-    <a href="news.html">News</a>
-    <a href="index.html">Projects</a>
-    <a href="about.html">About</a>
-    <a href="contact.html">Contact</a>
-  </nav>
-
-  <main>
-    <div class="gallery" id="gallery" aria-label="Modeling Gallery"></div>
-  </main>
-
-  <footer>© <span id="y"></span> Ethan</footer>
-
-  <!-- mobile menu overlay -->
-  <div class="menu-overlay" id="mobileMenu" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Menu">
-    <div class="menu-sheet">
-      <a href="modeling.html" aria-current="page">Modeling</a>
-      <a href="news.html">News</a>
-      <a href="index.html">Projects</a>
-      <a href="about.html">About</a>
-      <a href="contact.html">Contact</a>
-      <a href="#" class="menu-back" id="menuBackBtn">← Back</a>
-    </div>
-  </div>
-
-  <script>
-  (function () {
-    const $g = document.getElementById('gallery');
-    if (!$g) return;
-
-    /* --- Keep the centered, scaled image (no scroll) --- */
-    $g.style.display = 'flex';
-    $g.style.alignItems = 'center';
-    $g.style.justifyContent = 'center';
-
-    const unit = (CSS && CSS.supports && CSS.supports('height','100svh')) ? '100svh' : '100dvh';
-    // Header 68 + Footer 40 + Main padding 20 = 128px total
-    $g.style.height = `calc(${unit} - 128px)`;
-
-    const img = new Image();
-    img.alt = '';
-    img.src = '/testing-portfolio/images/FK6A9868.JPG';
-    img.style.maxWidth  = 'calc(100vw - 20px)'; // respect main’s left+right padding
-    img.style.maxHeight = '100%';
-    img.style.width  = 'auto';
-    img.style.height = 'auto';
-    img.style.display = 'block';
-    $g.appendChild(img);
-
-    const y = document.getElementById('y');
-    if (y) y.textContent = new Date().getFullYear();
-
-    // Ensure full-viewport body height on mobile for visible footer
-    document.body.style.height = (CSS && CSS.supports && CSS.supports('height','100svh')) ? '100svh' : '100dvh';
-
-    /* --- Mobile menu: "…" trigger opens centered overlay --- */
-    const trigger = document.querySelector('.menu-trigger');
-    const overlay = document.getElementById('mobileMenu');
-    const backBtn = document.getElementById('menuBackBtn');
-
-    function openMenu(){
-      overlay.setAttribute('aria-hidden','false');
-      trigger.setAttribute('aria-expanded','true');
-      // focus the first link for accessibility
-      const firstLink = overlay.querySelector('a');
-      if (firstLink) firstLink.focus();
-    }
-    function closeMenu(){
-      overlay.setAttribute('aria-hidden','true');
-      trigger.setAttribute('aria-expanded','false');
-      trigger.focus();
-    }
-
-    // Only active on small screens (trigger is hidden on desktop)
-    trigger.addEventListener('click', openMenu);
-    backBtn.addEventListener('click', function(e){ e.preventDefault(); closeMenu(); });
-    overlay.addEventListener('click', function(e){
-      // click outside the menu-sheet closes
-      if (e.target === overlay) closeMenu();
-    });
-    window.addEventListener('keydown', function(e){
-      if (e.key === 'Escape' && overlay.getAttribute('aria-hidden') === 'false') closeMenu();
-    });
-
-    // Re-apply sizing on orientation/resize/etc.
-    function fit(){
-      const unitNow = (CSS && CSS.supports && CSS.supports('height','100svh')) ? '100svh' : '100dvh';
-      $g.style.height = `calc(${unitNow} - 128px)`;
-      document.body.style.height = unitNow;
-    }
-    window.addEventListener('orientationchange', fit);
-    window.addEventListener('resize', fit);
-    window.addEventListener('pageshow', fit);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
-    img.addEventListener('load', fit);
-  })();
-  </script>
-</body>
-</html>
