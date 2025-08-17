@@ -6,14 +6,12 @@
   <title>Bonito — Ethan Granat</title>
   <meta name="color-scheme" content="light dark" />
   <link rel="stylesheet" href="style.css">
-
-  <!-- tiny page-local styles for the Instagram link -->
   <style>
+    /* tiny, page-local style just for the IG link */
     .ext-link {
       position:absolute; left:12px; top:10px;
       font:12px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      color: var(--muted, #777);
-      text-decoration: none;
+      color: var(--muted, #777); text-decoration: none;
     }
     .ext-link:hover { text-decoration: underline; color: inherit; }
   </style>
@@ -23,7 +21,7 @@
     <div class="title">Ethan Granat</div>
   </header>
 
-  <!-- fixed side menu (includes Bonito link) -->
+  <!-- fixed side menu (make sure this appears on your other pages too) -->
   <nav class="side-links" aria-label="Site links">
     <a href="modeling.html">Modeling</a>
     <a href="news.html">News</a>
@@ -44,13 +42,13 @@
     var g = document.getElementById('gallery');
     if (!g) return;
 
-    // Make the gallery the positioning context and center content
+    // center content in the gallery
     g.style.position = 'relative';
     g.style.display = 'flex';
     g.style.alignItems = 'center';
     g.style.justifyContent = 'center';
 
-    // Create the Instagram link (top-left, small)
+    // Instagram link
     var link = document.createElement('a');
     link.className = 'ext-link';
     link.href = 'https://www.instagram.com/reel/DFdfDSjPm6w/';
@@ -59,12 +57,12 @@
     link.textContent = 'View on Instagram →';
     g.appendChild(link);
 
-    // Create the video (scaled to fit; keeps aspect; no scroll)
+    // Video (must exist at /videos/bonitov5.mp4 in your repo)
     var vid = document.createElement('video');
     vid.controls = true;
-    vid.playsInline = true;  // iOS-friendly
+    vid.playsInline = true;
     vid.preload = 'metadata';
-    vid.src = '/testing-portfolio/videos/bonitov5.mp4'; // GitHub Pages path
+    vid.src = '/testing-portfolio/videos/bonitov5.mp4';
     vid.style.maxHeight = '100%';
     vid.style.width = 'auto';
     vid.style.height = 'auto';
@@ -73,13 +71,12 @@
 
     function vpad(el){
       var cs = window.getComputedStyle ? getComputedStyle(el) : el.currentStyle;
-      var pt = parseFloat(cs.paddingTop)||0, pb = parseFloat(cs.paddingBottom)||0;
-      return pt + pb;
+      return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
     }
 
-    // Size the gallery to the visible viewport area (between header and footer)
     function fit(){
-      var vh     = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
+      // height between header and footer (no page scroll)
+      var vh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
       var header = document.querySelector('header');
       var footer = document.querySelector('footer');
       var main   = document.querySelector('main');
@@ -92,15 +89,14 @@
       var h = Math.max(0, vh - headerH - footerH - mainPad);
       g.style.height = h + 'px';
 
-      // Reserve right gutter for the side menu so the video never sits underneath it (desktop)
+      // keep video out from under right-side menu on desktop
       var rightReserve = 0;
       if (menu) rightReserve = Math.ceil(menu.getBoundingClientRect().width) + 12;
 
-      // Respect main's horizontal padding: 10px left + 10px right = 20
+      // main has 10px left + 10px right padding = 20px
       vid.style.maxWidth = 'calc(100vw - ' + (20 + rightReserve) + 'px)';
     }
 
-    // Init + lifecycle
     fit();
     window.addEventListener('load', fit);
     window.addEventListener('resize', fit);
@@ -108,7 +104,6 @@
     window.addEventListener('pageshow', fit);
     vid.addEventListener('loadedmetadata', fit);
 
-    // Footer year
     var y = document.getElementById('y');
     if (y) y.textContent = new Date().getFullYear();
   })();
