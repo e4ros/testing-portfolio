@@ -27,17 +27,11 @@
   <footer>© <span id="y"></span> Ethan</footer>
 
   <script>
-  // Base path that works for both user sites (/) and project sites (/repo/)
-  const BASE = (() => {
-    const parts = location.pathname.split('/').filter(Boolean);
-    return parts.length ? `/${parts[0]}/` : '/';
-  })();
-
   // 7 × 5 = 35 tiles; first tile is your image
   const TOTAL_TILES = 35;
   const IMAGES = [
-    `${BASE}images/FK6A9868.JPG`,
-    // add more like: `${BASE}images/another.JPG`,
+    'images/FK6A9868.JPG'
+    // add more like: 'images/another.JPG',
   ];
 
   const $g = document.getElementById('gallery');
