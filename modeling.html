@@ -28,23 +28,21 @@
   <footer>© <span id="y"></span> Ethan</footer>
 
   <script>
-  // Build a single full-viewport tile with an image that scales to fit (no scroll, keep aspect)
+  // Build one full-viewport tile and size the gallery to the exact viewport area.
   (function () {
     const $g = document.getElementById('gallery');
     if (!$g) return;
 
-    // Create one tile that spans the entire grid area (rows 1..end, cols 1..end)
+    // Create one tile that spans the entire grid
     const tile = document.createElement('div');
     tile.className = 'tile';
     tile.style.gridRow = '1 / -1';
     tile.style.gridColumn = '1 / -1';
 
+    // Image fills available space while preserving aspect ratio
     const img = new Image();
     img.alt = '';
-    // Use the exact path/case to the image inside /images/
-    img.src = '/testing-portfolio/images/FK6A9868.JPG';
-
-    // Make the image fill the available space while preserving aspect ratio
+    img.src = '/testing-portfolio/images/FK6A9868.JPG'; // exact path/case
     img.style.width = '100%';
     img.style.height = '100%';
     img.style.objectFit = 'contain';
@@ -52,6 +50,26 @@
 
     tile.appendChild(img);
     $g.appendChild(tile);
+
+    // Precisely size the gallery between header and footer (no scroll)
+    function fitGalleryHeight() {
+      const header = document.querySelector('header');
+      const footer = document.querySelector('footer');
+      const main   = document.querySelector('main');
+
+      const pad = getComputedStyle(main);
+      const padV = parseFloat(pad.paddingTop) + parseFloat(pad.paddingBottom);
+
+      const h = window.innerHeight - header.offsetHeight - footer.offsetHeight - padV;
+      if (h > 0) $g.style.height = h + 'px';
+    }
+
+    // Run on initial paint & common lifecycle events
+    fitGalleryHeight();
+    window.addEventListener('load', fitGalleryHeight, { once: true });
+    window.addEventListener('resize', fitGalleryHeight);
+    window.addEventListener('orientationchange', fitGalleryHeight);
+    window.addEventListener('pageshow', fitGalleryHeight); // bfcache restore
   })();
 
   // footer year
