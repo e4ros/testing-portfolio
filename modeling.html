@@ -32,7 +32,7 @@
     const $g = document.getElementById('gallery');
     if (!$g) return;
 
-    // Build one centered image (keeps aspect ratio)
+    // Center the image; we'll reserve space for the right menu via padding-right.
     $g.style.display = 'flex';
     $g.style.alignItems = 'center';
     $g.style.justifyContent = 'center';
@@ -40,10 +40,11 @@
     const img = new Image();
     img.alt = '';
     img.src = '/testing-portfolio/images/FK6A9868.JPG'; // exact path & case
+    img.style.width = 'auto';
     img.style.height = 'auto';
-    img.style.width  = 'auto';
     img.style.maxHeight = '100%';
-    // maxWidth will be set dynamically so it never sits under the right menu
+    img.style.maxWidth = '100%'; // will respect gallery's padding-right
+    img.style.display = 'block';
     $g.appendChild(img);
 
     function vpad(el){
@@ -51,10 +52,10 @@
       return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
     }
 
-    function fit() {
-      // 1) Use the "small" or "dynamic" viewport height so phones account for toolbars
-      const unitOK = CSS.supports && (CSS.supports('height', '100svh') || CSS.supports('height', '100dvh'));
-      document.body.style.height = unitOK ? '100svh' : '100dvh'; // overrides global 100vh for this page
+    function fit(){
+      // Use modern viewport units so footer is always visible on mobile
+      const useSVH = CSS.supports && CSS.supports('height', '100svh');
+      document.body.style.height = useSVH ? '100svh' : '100dvh';
 
       const header = document.querySelector('header');
       const footer = document.querySelector('footer');
@@ -66,18 +67,21 @@
       const footerH   = footer ? footer.getBoundingClientRect().height : 0;
       const mainPadV  = main ? vpad(main) : 0;
 
-      // 2) Height available for the image (no scroll)
+      // Height available for the content (no scroll)
       const h = Math.max(0, viewportH - headerH - footerH - mainPadV);
       $g.style.height = h + 'px';
 
-      // 3) Reserve horizontal space for the right-side menu so the image doesn't sit under it
+      // Reserve horizontal space for the fixed right menu:
+      // set gallery padding-right = menu width + a little breathing room.
       const menuW = menu ? Math.ceil(menu.getBoundingClientRect().width) : 0;
-      // main has ~10px left+right padding total 20; subtract menu width + a little breathing room
-      const sideMargin = 20 + (menuW ? menuW + 12 : 0);
-      img.style.maxWidth = `calc(100vw - ${sideMargin}px)`;
+      const breathing = 16; // px
+      $g.style.paddingRight = menuW ? (menuW + breathing) + 'px' : '0px';
+
+      // Image can now safely use max-width:100% without sliding under the menu
+      img.style.maxWidth = '100%';
     }
 
-    // Run at key lifecycle moments
+    // Run on key lifecycle events
     fit();
     window.addEventListener('load', fit, { once: true });
     window.addEventListener('resize', fit);
@@ -86,7 +90,7 @@
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
     img.addEventListener('load', fit);
 
-    // Refit if header/footer size changes (text wraps, zoom, etc.)
+    // Refit if header/footer change size (text wrap/zoom)
     const ro = new ResizeObserver(fit);
     const header = document.querySelector('header');
     const footer = document.querySelector('footer');
