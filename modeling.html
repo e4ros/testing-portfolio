@@ -12,7 +12,7 @@
     <div class="title">Ethan Granat</div>
   </header>
 
-  <!-- same fixed side menu -->
+  <!-- fixed side menu -->
   <nav class="side-links" aria-label="Site links">
     <a href="modeling.html" aria-current="page">Modeling</a>
     <a href="#news">News</a>
@@ -28,36 +28,52 @@
   <footer>© <span id="y"></span> Ethan</footer>
 
   <script>
-  /* Compute the correct root for project sites:
-     "/" for user sites, "/<repo>/" for project sites */
+  // Base path that works on user sites and project sites
   const BASE = (() => {
     const parts = location.pathname.split('/').filter(Boolean);
-    // If it's a project site, parts[0] is the repo name
     return parts.length ? `/${parts[0]}/` : '/';
   })();
 
-  // 7 x 5 = 35 tiles
-  const total = 35;
-
-  // Add your image(s) here — match the filename case exactly
+  // --- Modeling images (add here). Match the exact filename case in the repo.
   const MODELING = [
-    { img: `${BASE}images/FK6A9868.jpg` }, // your test image
+    { img: `${BASE}images/FK6A9868.jpg` }, // ← your uploaded file (change to .JPG if needed)
     // { img: `${BASE}images/another.jpg` },
   ];
 
-  const items = [...MODELING];
-  while (items.length < total) items.push(null);
-
+  // Build the gallery: 35 tiles (7 × 5). Blanks show only the subtle background.
+  const TOTAL_TILES = 35;
   const $g = document.getElementById('gallery');
-  items.forEach(p => {
-    const el = document.createElement(p?.url ? 'a' : 'div');
-    el.className = 'tile';
-    if (p?.url) { el.href = p.url; el.target = '_blank'; el.rel = 'noreferrer'; }
-    el.innerHTML = p?.img ? `<img src="${p.img}" alt="">` : '—';
-    $g.appendChild(el);
-  });
 
+  // Only build this page's gallery (extra safety)
+  if ($g) {
+    const items = [...MODELING];
+    while (items.length < TOTAL_TILES) items.push(null);
+
+    items.forEach(p => {
+      const el = document.createElement('div');
+      el.className = 'tile';
+
+      if (p?.img) {
+        const img = new Image();
+        img.alt = '';
+        img.src = p.img;
+        img.onerror = () => {
+          // simple case fallback .jpg ↔ .JPG
+          if (/\.jpg$/i.test(img.src)) {
+            img.onerror = null;
+            img.src = img.src.replace(/\.jpg$/i, '.JPG');
+          }
+        };
+        el.appendChild(img);
+      }
+
+      $g.appendChild(el);
+    });
+  }
+
+  // footer year
   document.getElementById('y').textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
+
