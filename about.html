@@ -5,47 +5,146 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>About — Ethan Granat</title>
   <meta name="color-scheme" content="light dark" />
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+  <style>
+    /* ===== reset / tokens (synced with index) ===== */
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{margin:0;height:100%}
+    img{max-width:100%;display:block}
+    a{color:inherit;text-decoration:none}
 
-<header>
-  <div class="title">Ethan Granat</div>
-  <nav class="side-links">
+    :root{
+      --bg:#fff; --fg:#0b0b0b; --muted:#777; --line:#e7e7e7;
+      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Inter, Roboto, Arial;
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+      /* center panel size (same as index) */
+      --center-w: min(1100px, 78vw);
+      --center-h: min(620px, 64vh);
+
+      --cols: 4;
+      --gap: 12px;
+      --radius: 10px;
+      --tile-ratio: 4/3;
+
+      --pad: 14px;
+
+      /* unique About page body text font (only used in .content) */
+      --about-font: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", serif;
+    }
+
+    @media (prefers-color-scheme: dark){
+      :root{--bg:#0b0b0b; --fg:#f2f2f2; --muted:#aaa; --line:#2a2a2a;}
+    }
+
+    /* ===== page frame (no scroll; footer never overlaps) ===== */
+    body{
+      background:var(--bg); color:var(--fg); font-family:var(--sans);
+      height:100vh; display:grid;
+      grid-template-rows:auto 1fr auto;
+      overflow:hidden; /* lock viewport */
+    }
+
+    /* ===== header (synced with index) ===== */
+    header{
+      position:relative; height:68px; display:flex; align-items:center;
+      border-bottom:none; /* remove divider */
+      padding-left:20px;
+    }
+    .title{font-weight:600; font-size:clamp(18px,3vw,26px);}
+
+    /* ===== right-side vertical links (synced with index) ===== */
+    .side-links{
+      position:fixed; right:20px; top:50%; transform:translateY(-50%);
+      display:flex; flex-direction:column; gap:12px;
+      font:14px var(--mono); text-align:right; z-index:10;
+    }
+    .side-links a{color:var(--muted); text-decoration:none}
+    .side-links a:hover{color:var(--fg)}
+
+    /* ===== center card (synced with index) ===== */
+    main{display:grid; place-items:center; padding:10px; overflow:hidden}
+    .center{
+      width:var(--center-w); height:var(--center-h);
+      display:grid; grid-template-rows:auto 1fr; gap:10px;
+      border:1px solid var(--line); border-radius:12px;
+      background:color-mix(in oklab, var(--bg) 96%, transparent);
+      padding:10px;
+      overflow:hidden; /* keep content inside */
+    }
+    .grid-head{
+      display:flex; align-items:center; justify-content:space-between;
+      font:12px var(--mono); color:var(--muted);
+    }
+
+    /* ===== About content area ===== */
+    .content{
+      padding:8px var(--pad);
+      overflow:auto;           /* internal scroll if text is long */
+      font-family:var(--about-font);  /* unique font just for About body text */
+      line-height:1.5;
+    }
+    .content h1{
+      margin:0 0 10px 0;
+      font-family:var(--sans); /* keep headings consistent with site */
+      font-size:clamp(18px,3vw,24px);
+    }
+    .content p{margin:0 0 10px 0;}
+    .content .small{font:12px var(--mono); color:var(--muted);}
+
+    /* ===== footer (synced) ===== */
+    footer{
+      height:40px; display:flex; align-items:center; justify-content:center;
+      border-top:1px solid var(--line); color:var(--muted); font:12px var(--mono);
+    }
+
+    /* ===== responsive (synced) ===== */
+    @media (max-width:980px){ :root{ --cols:3; } }
+    @media (max-width:720px){
+      :root{ --cols:2; --center-w:92vw; --center-h:66vh; }
+    }
+  </style>
+</head>
+<body class="about">
+
+  <header>
+    <div class="title">Ethan Granat</div>
+  </header>
+
+  <!-- Same fixed side links as index -->
+  <nav class="side-links" aria-label="Site links">
     <a href="#modeling">Modeling</a>
     <a href="#news">News</a>
     <a href="index.html#projects">Projects</a>
-    <a href="about.html">About</a>
+    <a href="about.html" aria-current="page">About</a>
     <a href="#contact">Contact</a>
   </nav>
-</header>
 
-<main>
-  <section class="center">
-    <article class="content">
-      <h1>About</h1>
-      <p>
-        I’m a designer & engineer focused on minimal interfaces and circular materials.
-        I like readable UI, clear information architecture, and practical material systems.
-      </p>
-      <p>
-        Recent work spans UI concepts, composite structures, and campus zero-waste initiatives.
-        If you’d like to collaborate, email me.
-      </p>
-      <p class="small"><a href="index.html">← Back to portfolio</a></p>
-    </article>
-  </section>
-</main>
+  <main>
+    <section class="center" aria-label="About">
+      <div class="grid-head">
+        <div class="k" style="font:12px var(--mono); color:var(--muted)">About</div>
+        <div class="k" style="font:12px var(--mono); color:var(--muted)"></div>
+      </div>
 
-<footer>© <span id="y"></span> Ethan</footer>
+      <article class="content">
+        <h1>About</h1>
+        <p>
+          I’m a designer & engineer focused on minimal interfaces and circular materials.
+          I like readable UI, clear information architecture, and practical material systems.
+        </p>
+        <p>
+          Recent work spans UI concepts, composite structures, and campus zero-waste initiatives.
+          If you’d like to collaborate, email me.
+        </p>
+        <p class="small"><a href="index.html">← Back to portfolio</a></p>
+      </article>
+    </section>
+  </main>
 
-<script>
-  document.getElementById('y').textContent = new Date().getFullYear();
-  // prevent page scroll; the text area will scroll internally if long
-  document.body.style.overflow = 'hidden';
-</script>
+  <footer>© <span id="y"></span> Ethan</footer>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
-
-<body class="about">
-
