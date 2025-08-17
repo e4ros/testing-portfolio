@@ -116,15 +116,15 @@
 </nav>
 
 <main>
-  <div class="gallery" id="gallery" aria-label="Gallery"></div>
+  <!-- CHANGED: make this the expected grid container -->
+  <div class="grid" id="grid" aria-label="Gallery"></div>
 </main>
-
 
 <footer>© <span id="y"></span> Ethan</footer>
 
 <script>
 const PROJECTS = [
-  { title:"Microsite — On Borrowed Fabric", role:"Design · 2024", img:"images/project1.jpg", url:"#"},
+  { title:"Microsite — On Borrowed Fabric", role:"Design · 2024", img:"images/FK6A9868.JPG", url:"#"}, // <- updated to use your image
   { title:"Composite I-Beam Study",        role:"Materials · 2023", img:"images/project2.jpg", url:"#"},
 ];
 
@@ -142,13 +142,13 @@ items.slice(0, TOTAL).forEach(p => {
   const tag = p ? 'a' : 'div';
   const el = document.createElement(tag);
   el.className = 'tile';
-  if (p?.url) { el.href = p.url; el.target = '_blank'; el.rel = 'noreferrer'; }
+  if (p && p.url) { el.href = p.url; el.target = '_blank'; el.rel = 'noreferrer'; }
   el.innerHTML = `
     <div class="meta">
-      <div class="t">${p?.title || 'Empty slot'}</div>
-      <div class="k">${p?.role || 'Add project'}</div>
+      <div class="t">${p ? (p.title || '') : 'Empty slot'}</div>
+      <div class="k">${p ? (p.role || '') : 'Add project'}</div>
     </div>
-    <div class="thumb">${p?.img ? `<img src="${p.img}" alt="">` : '—'}</div>
+    <div class="thumb">${p && p.img ? `<img src="${p.img}" alt="">` : '—'}</div>
     <div class="cta">${p ? 'view →' : 'slot'}</div>
   `;
   $grid.appendChild(el);
