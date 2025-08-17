@@ -7,23 +7,24 @@
   <meta name="color-scheme" content="light dark" />
   <link rel="stylesheet" href="style.css">
 
-  <!-- minimal, page-local styles for plain-text slider controls -->
+  <!-- Plain-text, FIXED slider controls -->
   <style>
     .slider-controls{
-      position:fixed; /* placed relative to viewport by JS */
-      display:flex; align-items:center; gap:10px;
-      padding:0; border:none; background:transparent;
-      font:14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      user-select:none; color:inherit; z-index:5; white-space:nowrap;
-      left:8px; top:8px; /* safe initial spot before JS positions */
+      position: fixed;             /* fixed to viewport (does NOT move) */
+      left: 16px;                  /* constant horizontal offset */
+      top: 88px;                   /* constant vertical offset (tweak if you like) */
+      display: flex; align-items: center; gap: 10px;
+      padding: 0; border: 0; background: transparent;
+      font: 14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      color: inherit; user-select: none; white-space: nowrap; z-index: 5;
     }
     .slider-btn{
-      appearance:none; background:transparent; border:0; padding:0 6px;
-      font:18px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      cursor:pointer; color:inherit;
+      appearance: none; background: transparent; border: 0; padding: 0 6px;
+      font: 18px/1 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      cursor: pointer; color: inherit;
     }
-    .slider-btn:disabled{ opacity:.35; cursor:default }
-    .slider-count{ min-width:64px; text-align:center }
+    .slider-btn:disabled{ opacity: .35; cursor: default; }
+    .slider-count{ min-width: 64px; text-align: center; }
   </style>
 </head>
 <body class="modeling">
@@ -51,13 +52,13 @@
     var g = document.getElementById('gallery');
     if (!g) return;
 
-    // Positioning + centered image
+    // Center the image
     g.style.position = 'relative';
     g.style.display = 'flex';
     g.style.alignItems = 'center';
     g.style.justifyContent = 'center';
 
-    // ---------- IMAGES (first one removed) ----------
+    // ------------ IMAGES (first one removed) ------------
     var IMAGES = [
       '/testing-portfolio/images/FK6A9835_VSCO.JPG',
       '/testing-portfolio/images/FK6A9859_VSCO.JPG',
@@ -70,7 +71,7 @@
     ];
     var index = 0;
 
-    // Single <img> reused (keep aspect, centered)
+    // Reused <img>
     var img = new Image();
     img.alt = '';
     img.style.maxHeight = '100%';
@@ -79,7 +80,7 @@
     img.style.display = 'block';
     g.appendChild(img);
 
-    // Plain-text slider controls, positioned relative to viewport
+    // FIXED controls (do not move)
     var controls = document.createElement('div');
     controls.className = 'slider-controls';
     controls.innerHTML =
@@ -88,9 +89,9 @@
       '<button class="slider-btn" id="nextBtn" aria-label="Next">&gt;</button>';
     document.body.appendChild(controls);
 
-    var prevBtn = controls.querySelector('#prevBtn');
-    var nextBtn = controls.querySelector('#nextBtn');
-    var countEl = controls.querySelector('#count');
+    var prevBtn = document.getElementById('prevBtn');
+    var nextBtn = document.getElementById('nextBtn');
+    var countEl = document.getElementById('count');
 
     function vpad(el){
       var cs = window.getComputedStyle ? getComputedStyle(el) : el.currentStyle;
@@ -99,9 +100,12 @@
       return pt + pb;
     }
 
-    // Size gallery to visible viewport; keep footer visible; account for right menu on desktop
+    // CONSTANT gutter to the left so the image never sits under the fixed controls
+    var LEFT_GUTTER = 140;  // px (controls width + breathing room). Tweak if you want.
+
     function fit(){
-      var vh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
+      // Height between header and footer (no scroll)
+      var vh     = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
       var header = document.querySelector('header');
       var footer = document.querySelector('footer');
       var main   = document.querySelector('main');
@@ -111,57 +115,28 @@
       var footerH = footer ? footer.offsetHeight : 0;
       var mainPad = main ? vpad(main) : 0;
 
-      // Gallery height (no scroll)
       var h = Math.max(0, vh - headerH - footerH - mainPad);
       g.style.height = h + 'px';
 
-      // Right gutter for menu so image doesn't sit under it (desktop)
+      // Right gutter for the side menu (desktop) so image doesn't sit under it
       var rightReserve = 0;
       if (menu) rightReserve = Math.ceil(menu.getBoundingClientRect().width) + 12;
 
-      // Respect main's horizontal padding 10px+10px = 20px
-      img.style.maxWidth = 'calc(100vw - ' + (20 + rightReserve) + 'px)';
-
-      placeControls();
-    }
-
-    // Fixed control placement:
-    //   X: halfway between left viewport edge (0) and image's left edge
-    //   Y: vertically centered in the gallery area (not the image)
-    function placeControls(){
-      var rect = img.getBoundingClientRect();
-      var cw = controls.offsetWidth;
-      var ch = controls.offsetHeight;
-
-      // halfway between 0 and rect.left, then center the controls on that midpoint
-      var midpoint = rect.left / 2;
-      var left = Math.round(midpoint - cw / 2);
-
-      // clamp so it stays on-screen and never touches the image
-      var minLeft = 8;
-      var maxLeft = Math.floor(rect.left - cw - 8); // keep an 8px gap from image
-      if (typeof maxLeft !== 'number' || isNaN(maxLeft)) maxLeft = minLeft;
-      left = Math.max(minLeft, Math.min(maxLeft, left));
-
-      // vertically center in gallery area
-      var gr = g.getBoundingClientRect();
-      var top = Math.round(gr.top + gr.height / 2 - ch / 2);
-      top = Math.max(8, Math.min((window.innerHeight - ch - 8), top));
-
-      controls.style.left = left + 'px';
-      controls.style.top  = top  + 'px';
+      // Respect main's horizontal padding (10px + 10px = 20px) AND the constant LEFT_GUTTER
+      img.style.maxWidth = 'calc(100vw - ' + (20 + LEFT_GUTTER + rightReserve) + 'px)';
     }
 
     function updateButtons(){
       var total = IMAGES.length;
       countEl.textContent = (index + 1) + '/' + total;
+      prevBtn.disabled = (total <= 1) || (index === 0);
+      nextBtn.disabled = (total <= 1) || (index === total - 1);
     }
     function show(i){
       if (IMAGES.length === 0) return;
       index = Math.max(0, Math.min(IMAGES.length - 1, i));
       img.src = IMAGES[index];
       updateButtons();
-      setTimeout(placeControls, 0); // reposition after paint
     }
 
     // Wire up controls + keyboard
@@ -172,16 +147,16 @@
       if (e.key === 'ArrowRight') show(index + 1);
     });
 
-    // Initial render
+    // Init
     show(0);
     fit();
 
-    // Recalculate on common events
-    window.addEventListener('load', function(){ fit(); placeControls(); });
-    window.addEventListener('resize', function(){ fit(); placeControls(); });
-    window.addEventListener('orientationchange', function(){ fit(); placeControls(); });
-    window.addEventListener('pageshow', function(){ fit(); placeControls(); });
-    img.addEventListener('load', function(){ fit(); placeControls(); });
+    // Keep layout correct on common events
+    window.addEventListener('load', fit);
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', fit);
+    window.addEventListener('pageshow', fit);
+    img.addEventListener('load', fit);
 
     // Footer year
     var y = document.getElementById('y');
