@@ -6,6 +6,8 @@
   <title>Modeling — Ethan Granat</title>
   <meta name="color-scheme" content="light dark" />
   <link rel="stylesheet" href="style.css">
+  <!-- prevent favicon 404 in console -->
+  <link rel="icon" href="data:,">
 </head>
 <body class="modeling">
   <header>
@@ -28,23 +30,14 @@
   <footer>© <span id="y"></span> Ethan</footer>
 
   <script>
-  // Base path that works on user sites and project sites
-  const BASE = (() => {
-    const parts = location.pathname.split('/').filter(Boolean);
-    return parts.length ? `/${parts[0]}/` : '/';
-  })();
-
-  // --- Modeling images (add here). Match the exact filename case in the repo.
+  // Use a known-good absolute URL to the image in /images/
   const MODELING = [
-    { img: `${BASE}images/FK6A9868.JPG` }, // ← updated to images/ folder with .JPG
-    // { img: `${BASE}images/another.jpg` },
+    { img: 'https://e4ros.github.io/testing-portfolio/images/FK6A9868.JPG' },
   ];
 
-  // Build the gallery: 35 tiles (7 × 5). Blanks show only the subtle background.
   const TOTAL_TILES = 35;
   const $g = document.getElementById('gallery');
 
-  // Only build this page's gallery (extra safety)
   if ($g) {
     const items = [...MODELING];
     while (items.length < TOTAL_TILES) items.push(null);
@@ -57,13 +50,6 @@
         const img = new Image();
         img.alt = '';
         img.src = p.img;
-        img.onerror = () => {
-          // simple case fallback .jpg ↔ .JPG
-          if (/\.jpg$/i.test(img.src)) {
-            img.onerror = null;
-            img.src = img.src.replace(/\.jpg$/i, '.JPG');
-          }
-        };
         el.appendChild(img);
       }
 
@@ -71,7 +57,6 @@
     });
   }
 
-  // footer year
   document.getElementById('y').textContent = new Date().getFullYear();
   </script>
 </body>
