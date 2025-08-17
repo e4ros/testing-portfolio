@@ -10,12 +10,11 @@
   <!-- minimal, page-local styles for plain-text slider controls -->
   <style>
     .slider-controls{
-      position:absolute; top:10px; left:12px; transform:none;
+      position:absolute; top:10px; left:12px;
       display:flex; align-items:center; gap:10px;
       padding:0; border:none; background:transparent;
       font:14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      user-select:none; z-index:5;
-      color:inherit;
+      user-select:none; z-index:5; color:inherit;
     }
     .slider-btn{
       appearance:none; background:transparent; border:0; padding:0 6px;
@@ -48,23 +47,41 @@
 
   <script>
   (function () {
-    const $g = document.getElementById('gallery');
-    if (!$g) return;
+    var g = document.getElementById('gallery');
+    if (!g) return;
 
-    // Positioning context for controls
-    $g.style.position = 'relative';
-
-    // Center image in the gallery and fix height to visible viewport minus header/footer/padding
-    $g.style.display = 'flex';
-    $g.style.alignItems = 'center';
-    $g.style.justifyContent = 'center';
+    // Positioning context for controls + center image
+    g.style.position = 'relative';
+    g.style.display = 'flex';
+    g.style.alignItems = 'center';
+    g.style.justifyContent = 'center';
 
     // Header: 68px, Footer: 40px, Main padding: 10px top + 10px bottom = 20px → total 128px
-    const unit = (window.CSS && CSS.supports && CSS.supports('height','100svh')) ? '100svh' : '100dvh';
-    $g.style.height = `calc(${unit} - 128px)`;
+    function vpad(el){
+      var cs = window.getComputedStyle ? getComputedStyle(el) : el.currentStyle;
+      var pt = parseFloat(cs.paddingTop) || 0;
+      var pb = parseFloat(cs.paddingBottom) || 0;
+      return pt + pb;
+    }
+    function fit(){
+      var vh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
+      var header = document.querySelector('header');
+      var footer = document.querySelector('footer');
+      var main   = document.querySelector('main');
+
+      var headerH = header ? header.offsetHeight : 0;
+      var footerH = footer ? footer.offsetHeight : 0;
+      var mainPad = main ? vpad(main) : 0;
+
+      var h = Math.max(0, vh - headerH - footerH - mainPad);
+      g.style.height = h + 'px';
+
+      // image width: respect main's 10px + 10px padding => 20px
+      img.style.maxWidth = 'calc(100vw - 20px)';
+    }
 
     // ---------- IMAGES (first one removed) ----------
-    const IMAGES = [
+    var IMAGES = [
       '/testing-portfolio/images/FK6A9835_VSCO.JPG',
       '/testing-portfolio/images/FK6A9859_VSCO.JPG',
       '/testing-portfolio/images/FK6A9865_VSCO.JPG',
@@ -72,44 +89,68 @@
       '/testing-portfolio/images/FK6A9881_VSCO.JPG',
       '/testing-portfolio/images/FK6A9964_VSCO.JPG',
       '/testing-portfolio/images/IMG_8078.JPG',
-      '/testing-portfolio/images/IMG_8079.JPG',
+      '/testing-portfolio/images/IMG_8079.JPG'
     ];
-    let index = 0;
+    var index = 0;
 
     // Single <img> reused (keep aspect, centered)
-    const img = new Image();
+    var img = new Image();
     img.alt = '';
-    img.style.maxWidth  = 'calc(100vw - 20px)'; // 20px = main horizontal padding (10+10)
     img.style.maxHeight = '100%';
     img.style.width = 'auto';
     img.style.height = 'auto';
     img.style.display = 'block';
-    $g.appendChild(img);
+    g.appendChild(img);
 
     // Plain-text slider controls, offset in the top-left
-    const controls = document.createElement('div');
+    var controls = document.createElement('div');
     controls.className = 'slider-controls';
-    controls.innerHTML = `
-      <button class="slider-btn" id="prevBtn" aria-label="Previous">&lt;</button>
-      <span class="slider-count" id="count">1/${IMAGES.length}</span>
-      <button class="slider-btn" id="nextBtn" aria-label="Next">&gt;</button>
-    `;
-    $g.appendChild(controls);
+    controls.innerHTML =
+      '<button class="slider-btn" id="prevBtn" aria-label="Previous">&lt;</button>' +
+      '<span class="slider-count" id="count">1/' + IMAGES.length + '</span>' +
+      '<button class="slider-btn" id="nextBtn" aria-label="Next">&gt;</button>';
+    g.appendChild(controls);
 
-    const $prev  = controls.querySelector('#prevBtn');
-    const $next  = controls.querySelector('#nextBtn');
-    const $count = controls.querySelector('#count');
+    var prevBtn = document.getElementById('prevBtn');
+    var nextBtn = document.getElementById('nextBtn');
+    var countEl = document.getElementById('count');
 
-    function vpad(el){
-      const cs = getComputedStyle(el);
-      return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
+    function updateButtons(){
+      var total = IMAGES.length;
+      countEl.textContent = (index + 1) + '/' + total;
+      prevBtn.disabled = (total <= 1) || (index === 0);
+      nextBtn.disabled = (total <= 1) || (index === total - 1);
+    }
+    function show(i){
+      if (IMAGES.length === 0) return;
+      index = Math.max(0, Math.min(IMAGES.length - 1, i));
+      img.src = IMAGES[index];
+      updateButtons();
     }
 
-    function fit() {
-      // Use visible viewport height on phones
-      const viewportH = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
-      const header = document.querySelector('header');
-      const footer = document.querySelector('footer');
-      const main   = document.querySelector('main');
+    // Wire up controls + keyboard
+    prevBtn.addEventListener('click', function(){ show(index - 1); });
+    nextBtn.addEventListener('click', function(){ show(index + 1); });
+    window.addEventListener('keydown', function(e){
+      if (e.key === 'ArrowLeft')  show(index - 1);
+      if (e.key === 'ArrowRight') show(index + 1);
+    });
 
-      const h = Math.max(0, viewportH - (header?.offsetHeight||0) - (footer?.offsetHeigh
+    // Initial render
+    show(0);
+    fit();
+
+    // Recalculate on common events
+    window.addEventListener('load', fit);
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', fit);
+    window.addEventListener('pageshow', fit);
+    img.addEventListener('load', fit);
+
+    // Footer year
+    var y = document.getElementById('y');
+    if (y) y.textContent = new Date().getFullYear();
+  })();
+  </script>
+</body>
+</html>
