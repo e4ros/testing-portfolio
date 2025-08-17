@@ -1,4 +1,3 @@
-/* ===== your original gallery settings (unchanged except noted) ===== */
 :root{
   --rows: 5;
   --cols: 7;
@@ -17,7 +16,7 @@ main{
   display: grid;
   grid-template-columns: repeat(var(--cols), 1fr);
   grid-template-rows: repeat(var(--rows), 1fr);
-  gap: var(--gap, 12px);            /* ← fallback added */
+  gap: var(--gap);
   max-width: 1400px; /* a bit wider since 7 cols */
 }
 
@@ -26,12 +25,11 @@ main{
   overflow: hidden;
   background:
     repeating-linear-gradient(45deg,
-      color-mix(in oklab, var(--bg, #fff) 94%, transparent) 0 10px,
+      color-mix(in oklab, var(--bg) 94%, transparent) 0 10px,
       transparent 10px 20px);
   display: grid;
   place-items: center;
 }
-
 .tile img{
   width: 100%;
   height: 100%;
@@ -41,37 +39,3 @@ main{
 
 /* hide the old card layout */
 .center { display: none !important; }
-
-/* ===== minimal additions to meet goals ===== */
-
-/* 1) Frame the page so there's NO outer scroll and the footer never overlaps */
-body{
-  height: 100vh;
-  overflow: hidden;                      /* lock viewport */
-  display: grid;
-  grid-template-rows: auto 1fr auto;     /* header | main | footer */
-}
-
-/* ensure main content stays inside its row */
-main{ overflow: hidden; }
-
-/* remove any header divider that might appear */
-header{ border-bottom: none !important; }
-
-/* 2) Pin the right-side vertical menu and keep it on-screen on short viewports */
-.side-links{
-  position: fixed; right: 20px; top: 50%; transform: translateY(-50%);
-  display: flex; flex-direction: column; gap: 12px;
-  font: 14px var(--mono, ui-monospace);
-  text-align: right; z-index: 10;
-  max-height: calc(100vh - 120px);       /* prevent spilling off screen */
-  overflow: auto;                         /* internal scroll only if needed */
-  scrollbar-width: thin;
-}
-
-@media (max-height: 560px){
-  .side-links{ gap: 8px; font-size: 12px; }
-}
-@media (max-height: 460px){
-  .side-links{ gap: 6px; font-size: 11px; }
-}
