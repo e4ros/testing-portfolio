@@ -10,11 +10,14 @@
   <!-- minimal, page-local styles for plain-text slider controls -->
   <style>
     .slider-controls{
-      position:absolute; top:10px; left:12px;
+      position:absolute; /* placed into the left gutter by script */
+      left:10px;
+      top:10px;
       display:flex; align-items:center; gap:10px;
       padding:0; border:none; background:transparent;
       font:14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       user-select:none; z-index:5; color:inherit;
+      white-space:nowrap;
     }
     .slider-btn{
       appearance:none; background:transparent; border:0; padding:0 6px;
@@ -56,30 +59,6 @@
     g.style.alignItems = 'center';
     g.style.justifyContent = 'center';
 
-    // Header: 68px, Footer: 40px, Main padding: 10px top + 10px bottom = 20px → total 128px
-    function vpad(el){
-      var cs = window.getComputedStyle ? getComputedStyle(el) : el.currentStyle;
-      var pt = parseFloat(cs.paddingTop) || 0;
-      var pb = parseFloat(cs.paddingBottom) || 0;
-      return pt + pb;
-    }
-    function fit(){
-      var vh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
-      var header = document.querySelector('header');
-      var footer = document.querySelector('footer');
-      var main   = document.querySelector('main');
-
-      var headerH = header ? header.offsetHeight : 0;
-      var footerH = footer ? footer.offsetHeight : 0;
-      var mainPad = main ? vpad(main) : 0;
-
-      var h = Math.max(0, vh - headerH - footerH - mainPad);
-      g.style.height = h + 'px';
-
-      // image width: respect main's 10px + 10px padding => 20px
-      img.style.maxWidth = 'calc(100vw - 20px)';
-    }
-
     // ---------- IMAGES (first one removed) ----------
     var IMAGES = [
       '/testing-portfolio/images/FK6A9835_VSCO.JPG',
@@ -102,7 +81,7 @@
     img.style.display = 'block';
     g.appendChild(img);
 
-    // Plain-text slider controls, offset in the top-left
+    // Plain-text slider controls (will be placed into left gutter)
     var controls = document.createElement('div');
     controls.className = 'slider-controls';
     controls.innerHTML =
@@ -111,9 +90,50 @@
       '<button class="slider-btn" id="nextBtn" aria-label="Next">&gt;</button>';
     g.appendChild(controls);
 
-    var prevBtn = document.getElementById('prevBtn');
-    var nextBtn = document.getElementById('nextBtn');
-    var countEl = document.getElementById('count');
+    var prevBtn = controls.querySelector('#prevBtn');
+    var nextBtn = controls.querySelector('#nextBtn');
+    var countEl = controls.querySelector('#count');
+
+    function vpad(el){
+      var cs = window.getComputedStyle ? getComputedStyle(el) : el.currentStyle;
+      var pt = parseFloat(cs.paddingTop) || 0;
+      var pb = parseFloat(cs.paddingBottom) || 0;
+      return pt + pb;
+    }
+
+    // Reserve space: left gutter for controls, right gutter for side menu
+    function fit(){
+      var vh = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
+      var header = document.querySelector('header');
+      var footer = document.querySelector('footer');
+      var main   = document.querySelector('main');
+      var menu   = document.querySelector('.side-links');
+
+      var headerH = header ? header.offsetHeight : 0;
+      var footerH = footer ? footer.offsetHeight : 0;
+      var mainPad = main ? vpad(main) : 0;
+
+      // Gallery height (no scroll)
+      var h = Math.max(0, vh - headerH - footerH - mainPad);
+      g.style.height = h + 'px';
+
+      // Measure gutters we need to reserve
+      var rightReserve = 0;
+      if (menu) {
+        rightReserve = Math.ceil(menu.getBoundingClientRect().width) + 12; // menu width + breathing
+      }
+
+      var leftReserve = Math.ceil(controls.offsetWidth) + 16; // controls width + breathing
+
+      // Respect main's horizontal padding 10px+10px = 20px
+      img.style.maxWidth = 'calc(100vw - ' + (20 + leftReserve + rightReserve) + 'px)';
+
+      // Vertically center controls within gallery; stick to left edge (10px)
+      var controlsH = controls.offsetHeight;
+      var topPos = Math.max(10, Math.round((g.clientHeight - controlsH) / 2));
+      controls.style.top = topPos + 'px';
+      controls.style.left = '10px';
+    }
 
     function updateButtons(){
       var total = IMAGES.length;
@@ -126,6 +146,8 @@
       index = Math.max(0, Math.min(IMAGES.length - 1, i));
       img.src = IMAGES[index];
       updateButtons();
+      // After image swap, refit in case intrinsic ratio changes layout
+      setTimeout(fit, 0);
     }
 
     // Wire up controls + keyboard
