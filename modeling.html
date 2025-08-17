@@ -10,13 +10,12 @@
   <!-- minimal, page-local styles for plain-text slider controls -->
   <style>
     .slider-controls{
-      position:fixed;          /* outside the gallery; positioned via JS next to image */
+      position:fixed; /* placed relative to viewport by JS */
       display:flex; align-items:center; gap:10px;
       padding:0; border:none; background:transparent;
       font:14px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      user-select:none; color:inherit; z-index:5;
-      white-space:nowrap;
-      left:8px; top:8px;       /* initial safe spot; JS repositions after first paint */
+      user-select:none; color:inherit; z-index:5; white-space:nowrap;
+      left:8px; top:8px; /* safe initial spot before JS positions */
     }
     .slider-btn{
       appearance:none; background:transparent; border:0; padding:0 6px;
@@ -52,7 +51,7 @@
     var g = document.getElementById('gallery');
     if (!g) return;
 
-    // Positioning context + centered image
+    // Positioning + centered image
     g.style.position = 'relative';
     g.style.display = 'flex';
     g.style.alignItems = 'center';
@@ -80,7 +79,7 @@
     img.style.display = 'block';
     g.appendChild(img);
 
-    // Plain-text slider controls, added to BODY so they can live outside the gallery
+    // Plain-text slider controls, positioned relative to viewport
     var controls = document.createElement('div');
     controls.className = 'slider-controls';
     controls.innerHTML =
@@ -123,30 +122,31 @@
       // Respect main's horizontal padding 10px+10px = 20px
       img.style.maxWidth = 'calc(100vw - ' + (20 + rightReserve) + 'px)';
 
-      // Then place the controls next to (outside) the image
       placeControls();
     }
 
+    // Fixed control placement:
+    //   X: halfway between left viewport edge (0) and image's left edge
+    //   Y: vertically centered in the gallery area (not the image)
     function placeControls(){
-      // Compute a position to the LEFT of the image's bounding rect, not overlapping it
       var rect = img.getBoundingClientRect();
       var cw = controls.offsetWidth;
       var ch = controls.offsetHeight;
 
-      // Target left: 12px to the left of the image rectangle
-      var left = Math.round(rect.left) - cw - 12;
-      // Vertically centered on the image
-      var top  = Math.round(rect.top + rect.height / 2 - ch / 2);
+      // halfway between 0 and rect.left, then center the controls on that midpoint
+      var midpoint = rect.left / 2;
+      var left = Math.round(midpoint - cw / 2);
 
-      // Keep within viewport with safe margins
-      if (left < 8) left = 8;
+      // clamp so it stays on-screen and never touches the image
+      var minLeft = 8;
+      var maxLeft = Math.floor(rect.left - cw - 8); // keep an 8px gap from image
+      if (typeof maxLeft !== 'number' || isNaN(maxLeft)) maxLeft = minLeft;
+      left = Math.max(minLeft, Math.min(maxLeft, left));
+
+      // vertically center in gallery area
+      var gr = g.getBoundingClientRect();
+      var top = Math.round(gr.top + gr.height / 2 - ch / 2);
       top = Math.max(8, Math.min((window.innerHeight - ch - 8), top));
-
-      // If this still overlaps (e.g., image flush to left), place controls ABOVE the image instead
-      if (left + cw > rect.left - 4) {
-        left = Math.round(rect.left + (rect.width - cw) / 2);
-        top  = Math.max(8, Math.round(rect.top - ch - 8));
-      }
 
       controls.style.left = left + 'px';
       controls.style.top  = top  + 'px';
@@ -155,19 +155,13 @@
     function updateButtons(){
       var total = IMAGES.length;
       countEl.textContent = (index + 1) + '/' + total;
-      prevBtn.disabled = (total <= 1) || (index === 0);
-      nextBtn.disabled = (total <= 1) || (index === total - 1);
-      // Reposition in case the counter width changed
-      placeControls();
     }
-
     function show(i){
       if (IMAGES.length === 0) return;
       index = Math.max(0, Math.min(IMAGES.length - 1, i));
       img.src = IMAGES[index];
       updateButtons();
-      // After image swap, re-place once it paints
-      setTimeout(placeControls, 0);
+      setTimeout(placeControls, 0); // reposition after paint
     }
 
     // Wire up controls + keyboard
@@ -183,7 +177,7 @@
     fit();
 
     // Recalculate on common events
-    window.addEventListener('load', fit);
+    window.addEventListener('load', function(){ fit(); placeControls(); });
     window.addEventListener('resize', function(){ fit(); placeControls(); });
     window.addEventListener('orientationchange', function(){ fit(); placeControls(); });
     window.addEventListener('pageshow', function(){ fit(); placeControls(); });
