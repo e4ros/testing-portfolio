@@ -5,7 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Ethan Granat</title>
 <meta name="color-scheme" content="light dark" />
+
+<!-- minimal addition: use your shared stylesheet (has the gallery rules) -->
+<link rel="stylesheet" href="style.css">
+
 <style>
+  /* your original inline styles kept as-is */
   *,*::before,*::after{box-sizing:border-box}
   html,body{margin:0;height:100%}
   img{max-width:100%;display:block}
@@ -53,6 +58,7 @@
   .side-links a{color:var(--muted); text-decoration:none}
   .side-links a:hover{color:var(--fg)}
 
+  /* keep your old card styles; they're unused now but harmless */
   main{display:grid; place-items:center; padding:10px; overflow:hidden}
   .center{
     width:var(--center-w); height:var(--center-h);
@@ -107,54 +113,43 @@
 </header>
 
 <nav class="side-links" aria-label="Site links">
-  <a href="#modeling.html">Modeling</a>
-  <a href="#news.html">News</a>
-  <a href="#projects.html">Projects</a>
+  <a href="modeling.html">Modeling</a>
+  <a href="#news">News</a>
+  <a href="index.html" aria-current="page">Projects</a>
   <a href="about.html">About</a>
-  <a href="#contact.html">Contact</a>
+  <a href="contact.html">Contact</a>
 </nav>
 
 <main>
+  <!-- gallery uses the 7×5 rules from style.css -->
   <div class="gallery" id="gallery" aria-label="Gallery"></div>
 </main>
-
 
 <footer>© <span id="y"></span> Ethan</footer>
 
 <script>
-const PROJECTS = [
-  { title:"Microsite — On Borrowed Fabric", role:"Design · 2024", img:"images/project1.jpg", url:"#"},
-  { title:"Composite I-Beam Study",        role:"Materials · 2023", img:"images/project2.jpg", url:"#"},
-];
+  // Fixed 7×5 = 35 images; first tile shows your uploaded image
+  const TOTAL_TILES = 35;
+  const IMAGES = [
+    'images/FK6A9868.JPG',
+    // add more like: 'images/another.JPG',
+  ];
 
-const COLS = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cols')) || 4;
-const ROWS = 2;
-const TOTAL = COLS * ROWS;
+  const $g = document.getElementById('gallery');
+  for (let i = 0; i < TOTAL_TILES; i++) {
+    const el = document.createElement('div');
+    el.className = 'tile';
+    const src = IMAGES[i];
+    if (src) {
+      const img = new Image();
+      img.alt = '';
+      img.src = src;
+      el.appendChild(img);
+    }
+    $g.appendChild(el);
+  }
 
-const items = [...PROJECTS];
-while (items.length < TOTAL) items.push(null);
-
-const $grid  = document.getElementById('grid');
-const $count = document.getElementById('count');
-
-items.slice(0, TOTAL).forEach(p => {
-  const tag = p ? 'a' : 'div';
-  const el = document.createElement(tag);
-  el.className = 'tile';
-  if (p?.url) { el.href = p.url; el.target = '_blank'; el.rel = 'noreferrer'; }
-  el.innerHTML = `
-    <div class="meta">
-      <div class="t">${p?.title || 'Empty slot'}</div>
-      <div class="k">${p?.role || 'Add project'}</div>
-    </div>
-    <div class="thumb">${p?.img ? `<img src="${p.img}" alt="">` : '—'}</div>
-    <div class="cta">${p ? 'view →' : 'slot'}</div>
-  `;
-  $grid.appendChild(el);
-});
-
-if ($count) $count.textContent = `${PROJECTS.length} project${PROJECTS.length===1?'':'s'}`;
-document.getElementById('y').textContent = new Date().getFullYear();
+  document.getElementById('y').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
