@@ -6,6 +6,28 @@
   <title>Modeling — Ethan Granat</title>
   <meta name="color-scheme" content="light dark" />
   <link rel="stylesheet" href="style.css">
+
+  <!-- Mobile-only: move the vertical menu to the upper-right (inside header area) -->
+  <style>
+    @media (max-width: 640px){
+      body.modeling .side-links{
+        top: 8px;               /* sit inside header area */
+        right: 10px;
+        transform: none;        /* no vertical centering */
+        flex-direction: row;    /* horizontal list */
+        align-items: center;
+        justify-content: flex-end;
+        gap: 10px;
+        white-space: nowrap;    /* keep on one line */
+        max-height: 48px;       /* stay within header; avoid overlap with image */
+        overflow-x: auto;       /* scroll just the menu if needed */
+        overflow-y: hidden;
+        scrollbar-width: none;  /* hide scrollbar (Firefox) */
+      }
+      body.modeling .side-links::-webkit-scrollbar{ display: none; } /* hide (WebKit) */
+      body.modeling .side-links a{ font-size: 12px; } /* tuck links a bit on mobile */
+    }
+  </style>
 </head>
 <body class="modeling">
   <header>
@@ -32,74 +54,44 @@
     const $g = document.getElementById('gallery');
     if (!$g) return;
 
-    // Center the image; we'll reserve space for the right menu via padding-right.
+    // Center the image; no padding hacks. Keep aspect ratio, no scroll.
     $g.style.display = 'flex';
     $g.style.alignItems = 'center';
     $g.style.justifyContent = 'center';
 
+    // Header: 68px, Footer: 40px, Main padding: 10px + 10px = 20px → total 128px
+    const unit = (CSS && CSS.supports && CSS.supports('height','100svh')) ? '100svh' : '100dvh';
+    $g.style.height = `calc(${unit} - 128px)`; // fits visible viewport between header/footer
+
     const img = new Image();
     img.alt = '';
     img.src = '/testing-portfolio/images/FK6A9868.JPG'; // exact path & case
-    img.style.width = 'auto';
-    img.style.height = 'auto';
+
+    // Scale to fit; maintain aspect; keep centered
+    img.style.maxWidth  = 'calc(100vw - 20px)'; // respects main's horizontal padding
     img.style.maxHeight = '100%';
-    img.style.maxWidth = '100%'; // will respect gallery's padding-right
+    img.style.width  = 'auto';
+    img.style.height = 'auto';
     img.style.display = 'block';
+
     $g.appendChild(img);
 
-    function vpad(el){
-      const cs = getComputedStyle(el);
-      return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
-    }
+    // Ensure footer year
+    const y = document.getElementById('y');
+    if (y) y.textContent = new Date().getFullYear();
 
+    // Keep footer visible on mobile (override global 100vh only on this page)
+    document.body.style.height = (CSS && CSS.supports && CSS.supports('height','100svh')) ? '100svh' : '100dvh';
+
+    // Re-apply sizing on common events
     function fit(){
-      // Use modern viewport units so footer is always visible on mobile
-      const useSVH = CSS.supports && CSS.supports('height', '100svh');
-      document.body.style.height = useSVH ? '100svh' : '100dvh';
-
-      const header = document.querySelector('header');
-      const footer = document.querySelector('footer');
-      const main   = document.querySelector('main');
-      const menu   = document.querySelector('.side-links');
-
-      const viewportH = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
-      const headerH   = header ? header.getBoundingClientRect().height : 0;
-      const footerH   = footer ? footer.getBoundingClientRect().height : 0;
-      const mainPadV  = main ? vpad(main) : 0;
-
-      // Height available for the content (no scroll)
-      const h = Math.max(0, viewportH - headerH - footerH - mainPadV);
-      $g.style.height = h + 'px';
-
-      // Reserve horizontal space for the fixed right menu:
-      // set gallery padding-right = menu width + a little breathing room.
-      const menuW = menu ? Math.ceil(menu.getBoundingClientRect().width) : 0;
-      const breathing = 16; // px
-      $g.style.paddingRight = menuW ? (menuW + breathing) + 'px' : '0px';
-
-      // Image can now safely use max-width:100% without sliding under the menu
-      img.style.maxWidth = '100%';
+      $g.style.height = `calc(${(CSS && CSS.supports && CSS.supports('height','100svh')) ? '100svh' : '100dvh'} - 128px)`;
     }
-
-    // Run on key lifecycle events
-    fit();
-    window.addEventListener('load', fit, { once: true });
-    window.addEventListener('resize', fit);
     window.addEventListener('orientationchange', fit);
+    window.addEventListener('resize', fit);
     window.addEventListener('pageshow', fit);
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(fit);
     img.addEventListener('load', fit);
-
-    // Refit if header/footer change size (text wrap/zoom)
-    const ro = new ResizeObserver(fit);
-    const header = document.querySelector('header');
-    const footer = document.querySelector('footer');
-    if (header) ro.observe(header);
-    if (footer) ro.observe(footer);
-
-    // Footer year
-    const y = document.getElementById('y');
-    if (y) y.textContent = new Date().getFullYear();
   })();
   </script>
 </body>
