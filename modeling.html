@@ -28,26 +28,33 @@
   <footer>© <span id="y"></span> Ethan</footer>
 
   <script>
-  // 7 × 5 = 35 tiles; first tile is your image
-  const TOTAL_TILES = 35;
-  const IMAGES = [
-    '/testing-portfolio/images/FK6A9868.JPG', // root-relative, exact case
-  ];
+  // Build a single full-viewport tile with an image that scales to fit (no scroll, keep aspect)
+  (function () {
+    const $g = document.getElementById('gallery');
+    if (!$g) return;
 
-  const $g = document.getElementById('gallery');
-  for (let i = 0; i < TOTAL_TILES; i++) {
-    const el = document.createElement('div');
-    el.className = 'tile';
-    const src = IMAGES[i];
-    if (src) {
-      const img = new Image();
-      img.alt = '';
-      img.src = src;
-      el.appendChild(img);
-    }
-    $g.appendChild(el);
-  }
+    // Create one tile that spans the entire grid area (rows 1..end, cols 1..end)
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.style.gridRow = '1 / -1';
+    tile.style.gridColumn = '1 / -1';
 
+    const img = new Image();
+    img.alt = '';
+    // Use the exact path/case to the image inside /images/
+    img.src = '/testing-portfolio/images/FK6A9868.JPG';
+
+    // Make the image fill the available space while preserving aspect ratio
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'contain';
+    img.style.display = 'block';
+
+    tile.appendChild(img);
+    $g.appendChild(tile);
+  })();
+
+  // footer year
   document.getElementById('y').textContent = new Date().getFullYear();
   </script>
 </body>
