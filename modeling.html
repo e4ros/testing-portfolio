@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Modeling — Ethan Granat</title>
+  <meta name="color-scheme" content="light dark" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="modeling">
+  <header>
+    <div class="title">Ethan Granat</div>
+  </header>
+
+  <!-- same fixed side menu -->
+  <nav class="side-links" aria-label="Site links">
+    <a href="modeling.html" aria-current="page">Modeling</a>
+    <a href="#news">News</a>
+    <a href="index.html">Projects</a>
+    <a href="about.html">About</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+
+  <main>
+    <div class="gallery" id="gallery" aria-label="Modeling Gallery"></div>
+  </main>
+
+  <footer>© <span id="y"></span> Ethan</footer>
+
+  <script>
+  // 7 x 5 = 35 tiles (matches your homepage grid)
+  const MODELING = [
+    { img:"images/FK6A9868.jpg" }, // your test image
+    // add more modeling images here as you like
+  ];
+
+  const total = 35;
+  const items = [...MODELING];
+  while (items.length < total) items.push(null);
+
+  const $g = document.getElementById('gallery');
+  items.forEach(p => {
+    const el = document.createElement(p?.url ? 'a' : 'div');
+    el.className = 'tile';
+    if (p?.url) { el.href = p.url; el.target = '_blank'; el.rel = 'noreferrer'; }
+    el.innerHTML = p?.img ? `<img src="${p.img}" alt="">` : '—';
+    $g.appendChild(el);
+  });
+
+  document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
