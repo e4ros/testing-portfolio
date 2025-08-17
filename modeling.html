@@ -28,7 +28,6 @@
   <footer>© <span id="y"></span> Ethan</footer>
 
   <script>
-  // Build one full-viewport tile and size the gallery to the exact viewport area.
   (function () {
     const $g = document.getElementById('gallery');
     if (!$g) return;
@@ -39,10 +38,10 @@
     tile.style.gridRow = '1 / -1';
     tile.style.gridColumn = '1 / -1';
 
-    // Image fills available space while preserving aspect ratio
     const img = new Image();
     img.alt = '';
-    img.src = '/testing-portfolio/images/FK6A9868.JPG'; // exact path/case
+    img.src = '/testing-portfolio/images/FK6A9868.JPG'; // exact path & case
+    // Make the image fill available space while preserving aspect ratio
     img.style.width = '100%';
     img.style.height = '100%';
     img.style.objectFit = 'contain';
@@ -51,25 +50,46 @@
     tile.appendChild(img);
     $g.appendChild(tile);
 
-    // Precisely size the gallery between header and footer (no scroll)
+    function getVerticalPadding(el) {
+      const cs = getComputedStyle(el);
+      return (parseFloat(cs.paddingTop) || 0) + (parseFloat(cs.paddingBottom) || 0);
+    }
+
     function fitGalleryHeight() {
       const header = document.querySelector('header');
       const footer = document.querySelector('footer');
       const main   = document.querySelector('main');
 
-      const pad = getComputedStyle(main);
-      const padV = parseFloat(pad.paddingTop) + parseFloat(pad.paddingBottom);
+      const viewportH = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
+      const headerH   = header ? header.getBoundingClientRect().height : 0;
+      const footerH   = footer ? footer.getBoundingClientRect().height : 0;
+      const mainPadV  = main ? getVerticalPadding(main) : 0;
 
-      const h = window.innerHeight - header.offsetHeight - footer.offsetHeight - padV;
-      if (h > 0) $g.style.height = h + 'px';
+      const h = Math.max(0, viewportH - headerH - footerH - mainPadV);
+      // apply on the next frame to avoid layout thrash during initial paint
+      requestAnimationFrame(() => { $g.style.height = h + 'px'; });
     }
 
-    // Run on initial paint & common lifecycle events
-    fitGalleryHeight();
+    // Run at key moments
+    document.addEventListener('DOMContentLoaded', fitGalleryHeight);
     window.addEventListener('load', fitGalleryHeight, { once: true });
     window.addEventListener('resize', fitGalleryHeight);
     window.addEventListener('orientationchange', fitGalleryHeight);
     window.addEventListener('pageshow', fitGalleryHeight); // bfcache restore
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(fitGalleryHeight);
+    }
+    img.addEventListener('load', fitGalleryHeight);
+
+    // Resize again if header or footer change size (responsive text)
+    const ro = new ResizeObserver(fitGalleryHeight);
+    const header = document.querySelector('header');
+    const footer = document.querySelector('footer');
+    if (header) ro.observe(header);
+    if (footer) ro.observe(footer);
+
+    // Initial sizing
+    fitGalleryHeight();
   })();
 
   // footer year
