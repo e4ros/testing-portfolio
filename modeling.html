@@ -22,7 +22,10 @@
   </nav>
 
   <main>
-    <div class="gallery" id="gallery" aria-label="Modeling Gallery"></div>
+    <!-- Inline height uses dynamic viewport (dvh) and your known header/footer/padding sizes:
+         header 68px + footer 40px + main padding (10px top + 10px bottom) = 118px -->
+    <div class="gallery" id="gallery" aria-label="Modeling Gallery"
+         style="height:calc(100dvh - 118px)"></div>
   </main>
 
   <footer>© <span id="y"></span> Ethan</footer>
@@ -32,12 +35,12 @@
     const $g = document.getElementById('gallery');
     if (!$g) return;
 
-    // Build one full-span tile
+    // One tile spanning the entire grid
     const tile = document.createElement('div');
     tile.className = 'tile';
     tile.style.gridRow = '1 / -1';
     tile.style.gridColumn = '1 / -1';
-    // Center contents and let the image size itself via max- constraints
+    // Center the image; let it size with max-constraints
     tile.style.display = 'flex';
     tile.style.alignItems = 'center';
     tile.style.justifyContent = 'center';
@@ -45,55 +48,19 @@
     const img = new Image();
     img.alt = '';
     img.src = '/testing-portfolio/images/FK6A9868.JPG'; // exact path & case
-
-    // Fit image inside available space while preserving aspect ratio
-    img.style.maxWidth  = '100%';
+    // Maintain aspect ratio, fill available area without overflow
+    img.style.maxWidth = '100%';
     img.style.maxHeight = '100%';
-    img.style.width  = 'auto';
+    img.style.width = 'auto';
     img.style.height = 'auto';
     img.style.display = 'block';
 
     tile.appendChild(img);
     $g.appendChild(tile);
 
-    // Precisely size the gallery to fill viewport between header and footer (no scroll)
-    function verticalPadding(el){
-      const cs = getComputedStyle(el);
-      return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
-    }
-    function fitGalleryHeight(){
-      const header = document.querySelector('header');
-      const footer = document.querySelector('footer');
-      const main   = document.querySelector('main');
-
-      const viewportH = (window.visualViewport && window.visualViewport.height) || window.innerHeight;
-      const headerH   = header ? header.getBoundingClientRect().height : 0;
-      const footerH   = footer ? footer.getBoundingClientRect().height : 0;
-      const mainPadV  = main ? verticalPadding(main) : 0;
-
-      const h = Math.max(0, viewportH - headerH - footerH - mainPadV);
-      $g.style.height = h + 'px';
-    }
-
-    // Run on first paint and on any viewport/layout change
-    fitGalleryHeight();
-    window.addEventListener('load', fitGalleryHeight, { once: true });
-    window.addEventListener('resize', fitGalleryHeight);
-    window.addEventListener('orientationchange', fitGalleryHeight);
-    window.addEventListener('pageshow', fitGalleryHeight);
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(fitGalleryHeight);
-    img.addEventListener('load', fitGalleryHeight);
-
-    // Track header/footer size changes (responsive text/zoom)
-    const ro = new ResizeObserver(fitGalleryHeight);
-    const header = document.querySelector('header');
-    const footer = document.querySelector('footer');
-    if (header) ro.observe(header);
-    if (footer) ro.observe(footer);
+    // Update footer year
+    document.getElementById('y').textContent = new Date().getFullYear();
   })();
-
-  // footer year
-  document.getElementById('y').textContent = new Date().getFullYear();
   </script>
 </body>
 </html>
