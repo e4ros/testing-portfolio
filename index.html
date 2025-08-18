@@ -71,9 +71,13 @@
   }
   .gallery .tile{
     border:none; border-radius:0; background:var(--bg);
-    /* 🟢 Same trick as modeling.html: flex-center and let media size itself */
     display:flex; align-items:center; justify-content:center;
     overflow:hidden;
+  }
+  /* Shade ONLY empty tiles (no child content yet) */
+  .gallery .tile:empty{
+    /* subtle light gray that adapts to theme */
+    background: color-mix(in oklab, var(--bg) 85%, var(--fg) 15%);
   }
   .gallery .tile img{
     max-width:100%; max-height:100%;
@@ -127,30 +131,39 @@
     g.appendChild(t);
   }
 
-  // Put an image into the first cell (top-left). Exact case matters (.JPG)
-  var first = g.querySelector('.tile:nth-child(1)');
-  if (first) {
+  // Your images (exact filenames/case from /images)
+  var IMAGES = [
+    'images/FK6A9868.JPG',
+    'images/FK6A9835_VSCO.JPG',
+    'images/FK6A9859_VSCO.JPG',
+    'images/FK6A9865_VSCO.JPG',
+    'images/FK6A9881_VSCO.JPG',
+    'images/FK6A9964_VSCO.JPG',
+    'images/IMG_8078.JPG',
+    'images/IMG_8079.JPG'
+  ];
+
+  // Drop them into the first N tiles
+  var tiles = g.querySelectorAll('.tile');
+  for (var j=0; j<IMAGES.length && j<tiles.length; j++){
     var img = new Image();
     img.alt = '';
-    img.src = 'images/FK6A9868.JPG';
-    // 🟢 Same sizing as modeling.html
+    img.src = IMAGES[j];
     img.style.maxWidth = '100%';
     img.style.maxHeight = '100%';
     img.style.width = 'auto';
     img.style.height = 'auto';
-    first.appendChild(img);
+    tiles[j].appendChild(img);
   }
 
-  // Size gallery to visible area and keep it clear of the right menu (modeling-style fit)
+  // Size gallery to visible area and keep it clear of the right menu
   function vpad(el){
     var cs = window.getComputedStyle ? getComputedStyle(el) : el.currentStyle;
     return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
   }
   function fit(){
-    // Prefer visualViewport height on mobile (like modeling.html)
-    var vh = (window.visualViewport && window.visualViewport.height)
-             || window.innerHeight || document.documentElement.clientHeight || 0;
-
+    var vh     = (window.visualViewport && window.visualViewport.height)
+                 || window.innerHeight || document.documentElement.clientHeight || 0;
     var header = document.querySelector('header');
     var footer = document.querySelector('footer');
     var main   = document.querySelector('main');
@@ -162,7 +175,6 @@
 
     g.style.height = Math.max(0, vh - headerH - footerH - mainPad) + 'px';
 
-    // keep mosaic from going under the right-side menu
     var rightReserve = 0;
     if (menu) rightReserve = Math.ceil(menu.getBoundingClientRect().width) + 12;
 
