@@ -94,7 +94,7 @@
   }
 
   @media (max-width:980px){ :root{ --cols:3; } }
-  @media (max-width:720px){
+  @media (max-width:1060px){
     :root{ --cols:2; --center-w:92vw; --center-h:66vh;}
   }
 </style>
@@ -165,7 +165,7 @@
     return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
   }
 
-  // Size gallery to visible area; reduce width by menu width + 72 so grid stays centered
+  // Size gallery to visible area; reduce width by menu width + 106 so grid stays centered
   function fit(){
     var vh     = (window.visualViewport && window.visualViewport.height)
                  || window.innerHeight || document.documentElement.clientHeight || 0;
@@ -181,11 +181,11 @@
     // Height between header/footer (no page scroll)
     g.style.height = Math.max(0, vh - headerH - footerH - mainPad) + 'px';
 
-    // Compute width reduction for the fixed right menu (+72 breathing room)
+    // Compute width reduction for the fixed right menu (+106 breathing room)
     var rightReserve = 0;
     if (menu) {
       var mr = menu.getBoundingClientRect();
-      rightReserve = Math.ceil(mr.width) + 72; // << increased breathing room
+      rightReserve = Math.ceil(mr.width) + 106; // << increased breathing room
     }
 
     // main has 10px left + 10px right padding = 20px
