@@ -30,7 +30,7 @@
     --rows: 5;
     --mcols: 7;
 
-    /* NEW: spacing between mosaic tiles and dynamic padding for menu */
+    /* spacing between mosaic tiles and dynamic padding for menu */
     --m-gap: 10px;
     --menu-pad: 0px; /* set from JS based on menu width */
   }
@@ -65,7 +65,7 @@
   /* hide old card panel */
   .center{display:none}
 
-  /* 7×5 image mosaic, with spacing and NO border overlap with menu */
+  /* 7×5 image mosaic, with spacing and reserved space for menu */
   .gallery{
     width:100%;
     height:100%;
@@ -73,7 +73,7 @@
     grid-template-columns:repeat(var(--mcols), 1fr);
     grid-template-rows:repeat(var(--rows), 1fr);
     gap:var(--m-gap);
-    padding-right:var(--menu-pad); /* ← reserve space for menu so grid never sits under it */
+    padding-right:var(--menu-pad); /* reserve space for menu so grid never sits under it */
   }
   .gallery .tile{
     border:none; border-radius:0; background:var(--bg);
@@ -187,9 +187,8 @@
     var rightReserve = 0;
     if (menu) {
       var mr = menu.getBoundingClientRect();
-      rightReserve = Math.ceil(mr.width) + 12; // a little breathing room
+      rightReserve = Math.ceil(mr.width) + 24; // ← was +12; give a smidge more room
     }
-    // Set a CSS var that the gallery uses as padding-right
     document.documentElement.style.setProperty('--menu-pad', rightReserve + 'px');
 
     // Width stays full (minus main’s own 10px side padding); padding-right handles the menu
