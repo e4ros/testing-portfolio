@@ -25,6 +25,10 @@
     --tile-ratio: 4/3;
 
     --pad: 14px;
+
+    /* NEW: fixed mosaic size */
+    --rows: 5;
+    --mcols: 7;
   }
 
   @media (prefers-color-scheme: dark){
@@ -54,40 +58,34 @@
   .side-links a:hover{color:var(--fg)}
 
   main{display:grid; place-items:center; padding:10px; overflow:hidden}
-  .center{
-    width:var(--center-w); height:var(--center-h);
-    display:grid; grid-template-rows:auto 1fr; gap:10px;
-    border:1px solid var(--line); border-radius:12px;
-    background:color-mix(in oklab, var(--bg) 96%, transparent);
-    padding:10px;
-    overflow:hidden;
-  }
-  .grid-head{
-    display:flex; align-items:center; justify-content:space-between;
-    font:12px var(--mono); color:var(--muted);
-  }
-  .grid{
-    display:grid; grid-template-columns:repeat(var(--cols),1fr); gap:var(--gap);
-  }
 
+  /* legacy card panel (kept but unused) */
+  .center{display:none}
+
+  /* legacy grid/card styles (kept for other pages) */
+  .grid-head{display:flex; align-items:center; justify-content:space-between; font:12px var(--mono); color:var(--muted)}
+  .grid{display:grid; grid-template-columns:repeat(var(--cols),1fr); gap:var(--gap)}
   .tile{
     border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
     display:grid; grid-template-rows:auto 1fr auto;
     background:color-mix(in oklab, var(--bg) 98%, transparent);
   }
-  .meta{padding:8px var(--pad); display:grid; gap:4px}
-  .t{font-weight:600; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
-  .k{font:11px var(--mono); color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
 
-  .thumb{
-    aspect-ratio:var(--tile-ratio);
-    background:repeating-linear-gradient(45deg,
-        color-mix(in oklab,var(--bg) 94%, transparent) 0 10px,
-        transparent 10px 20px);
-    display:grid; place-items:center; color:var(--muted); font:12px var(--mono);
+  /* ===== NEW: 7×5 image mosaic (borderless, no gaps) ===== */
+  .gallery{
+    width:100%; height:100%;
+    display:grid;
+    grid-template-columns:repeat(var(--mcols), 1fr);
+    grid-template-rows:repeat(var(--rows), 1fr);
+    gap:0; /* no seams between tiles */
   }
-  .thumb img{width:100%; height:100%; object-fit:cover}
-  .cta{border-top:1px solid var(--line); padding:6px var(--pad); font:12px var(--mono); color:var(--muted)}
+  .gallery .tile{
+    border:none; border-radius:0; background:transparent;
+    display:block; overflow:hidden;
+  }
+  .gallery .tile img{
+    width:100%; height:100%; object-fit:cover; display:block;
+  }
 
   footer{
     height:40px; display:flex; align-items:center; justify-content:center;
@@ -116,46 +114,68 @@
 </nav>
 
 <main>
-  <!-- CHANGED: make this the expected grid container -->
-  <div class="grid" id="grid" aria-label="Gallery"></div>
+  <!-- NEW: the 7×5 mosaic container -->
+  <div class="gallery" id="gallery" aria-label="Gallery"></div>
 </main>
 
 <footer>© <span id="y"></span> Ethan</footer>
 
 <script>
-const PROJECTS = [
-  { title:"Microsite — On Borrowed Fabric", role:"Design · 2024", img:"images/FK6A9868.JPG", url:"#"}, // <- updated to use your image
-  { title:"Composite I-Beam Study",        role:"Materials · 2023", img:"images/project2.jpg", url:"#"},
-];
+(function(){
+  var g = document.getElementById('gallery');
+  if(!g) return;
 
-const COLS = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--cols')) || 4;
-const ROWS = 2;
-const TOTAL = COLS * ROWS;
+  var ROWS = 5, COLS = 7, TOTAL = ROWS * COLS;
 
-const items = [...PROJECTS];
-while (items.length < TOTAL) items.push(null);
+  // Build 35 empty tiles (placeholders). To add images later, just
+  // replace a tile's innerHTML with <img src="images/your.jpg" alt="">
+  if (g.children.length === 0){
+    for (var i=0;i<TOTAL;i++){
+      var t = document.createElement('div');
+      t.className = 'tile';
+      g.appendChild(t);
+    }
+  }
 
-const $grid  = document.getElementById('grid');
-const $count = document.getElementById('count');
+  // Size gallery to the visible area and keep it clear of the right menu
+  function vpad(el){
+    var cs = window.getComputedStyle ? getComputedStyle(el) : el.currentStyle;
+    return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
+  }
+  function fit(){
+    var vh     = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
+    var header = document.querySelector('header');
+    var footer = document.querySelector('footer');
+    var main   = document.querySelector('main');
+    var menu   = document.querySelector('.side-links');
 
-items.slice(0, TOTAL).forEach(p => {
-  const tag = p ? 'a' : 'div';
-  const el = document.createElement(tag);
-  el.className = 'tile';
-  if (p && p.url) { el.href = p.url; el.target = '_blank'; el.rel = 'noreferrer'; }
-  el.innerHTML = `
-    <div class="meta">
-      <div class="t">${p ? (p.title || '') : 'Empty slot'}</div>
-      <div class="k">${p ? (p.role || '') : 'Add project'}</div>
-    </div>
-    <div class="thumb">${p && p.img ? `<img src="${p.img}" alt="">` : '—'}</div>
-    <div class="cta">${p ? 'view →' : 'slot'}</div>
-  `;
-  $grid.appendChild(el);
-});
+    var headerH = header ? header.offsetHeight : 0;
+    var footerH = footer ? footer.offsetHeight : 0;
+    var mainPad = main ? vpad(main) : 0;
 
-if ($count) $count.textContent = `${PROJECTS.length} project${PROJECTS.length===1?'':'s'}`;
-document.getElementById('y').textContent = new Date().getFullYear();
+    // height between header and footer (no scroll)
+    g.style.height = Math.max(0, vh - headerH - footerH - mainPad) + 'px';
+
+    // keep mosaic from going under the right-side menu
+    var rightReserve = 0;
+    if (menu) rightReserve = Math.ceil(menu.getBoundingClientRect().width) + 12;
+
+    // main has 10px left + 10px right padding = 20px
+    var w = 'calc(100vw - ' + (20 + rightReserve) + 'px)';
+    g.style.maxWidth = w;
+    g.style.width = w;
+  }
+
+  fit();
+  window.addEventListener('load', fit);
+  window.addEventListener('resize', fit);
+  window.addEventListener('orientationchange', fit);
+  window.addEventListener('pageshow', fit);
+
+  // footer year
+  var y = document.getElementById('y');
+  if (y) y.textContent = new Date().getFullYear();
+})();
 </script>
 </body>
 </html>
