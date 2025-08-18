@@ -70,11 +70,15 @@
     gap:0;
   }
   .gallery .tile{
-    border:none; border-radius:0; background:transparent;
-    display:block; overflow:hidden;
+    border:none; border-radius:0; background:var(--bg);
+    /* 🟢 Same trick as modeling.html: flex-center and let media size itself */
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
   }
   .gallery .tile img{
-    width:100%; height:100%; object-fit:cover; display:block;
+    max-width:100%; max-height:100%;
+    width:auto; height:auto;            /* keep aspect ratio */
+    display:block;
   }
 
   footer{
@@ -116,26 +120,37 @@
 
   var ROWS = 5, COLS = 7, TOTAL = ROWS * COLS;
 
-  // Build 35 empty tiles
+  // Build 35 tiles
   for (var i=0;i<TOTAL;i++){
     var t = document.createElement('div');
     t.className = 'tile';
     g.appendChild(t);
   }
 
-  // ⬇️ ADD ONE IMAGE TO THE FIRST CELL (exact filename + case)
+  // Put an image into the first cell (top-left). Exact case matters (.JPG)
   var first = g.querySelector('.tile:nth-child(1)');
   if (first) {
-    first.innerHTML = '<img src="images/FK6A9868.JPG" alt="">';
+    var img = new Image();
+    img.alt = '';
+    img.src = 'images/FK6A9868.JPG';
+    // 🟢 Same sizing as modeling.html
+    img.style.maxWidth = '100%';
+    img.style.maxHeight = '100%';
+    img.style.width = 'auto';
+    img.style.height = 'auto';
+    first.appendChild(img);
   }
 
-  // Size gallery to visible area and keep it clear of the right menu
+  // Size gallery to visible area and keep it clear of the right menu (modeling-style fit)
   function vpad(el){
     var cs = window.getComputedStyle ? getComputedStyle(el) : el.currentStyle;
     return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
   }
   function fit(){
-    var vh     = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight || 0;
+    // Prefer visualViewport height on mobile (like modeling.html)
+    var vh = (window.visualViewport && window.visualViewport.height)
+             || window.innerHeight || document.documentElement.clientHeight || 0;
+
     var header = document.querySelector('header');
     var footer = document.querySelector('footer');
     var main   = document.querySelector('main');
@@ -147,6 +162,7 @@
 
     g.style.height = Math.max(0, vh - headerH - footerH - mainPad) + 'px';
 
+    // keep mosaic from going under the right-side menu
     var rightReserve = 0;
     if (menu) rightReserve = Math.ceil(menu.getBoundingClientRect().width) + 12;
 
