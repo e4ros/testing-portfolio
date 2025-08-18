@@ -30,9 +30,8 @@
     --rows: 5;
     --mcols: 7;
 
-    /* spacing between mosaic tiles and dynamic padding for menu */
+    /* spacing between mosaic tiles */
     --m-gap: 10px;
-    --menu-pad: 0px; /* set from JS based on menu width */
   }
 
   @media (prefers-color-scheme: dark){
@@ -65,15 +64,14 @@
   /* hide old card panel */
   .center{display:none}
 
-  /* 7×5 image mosaic, with spacing and reserved space for menu */
+  /* 7×5 image mosaic, with spacing between tiles */
   .gallery{
-    width:100%;
     height:100%;
     display:grid;
     grid-template-columns:repeat(var(--mcols), 1fr);
     grid-template-rows:repeat(var(--rows), 1fr);
     gap:var(--m-gap);
-    padding-right:var(--menu-pad); /* reserve space for menu so grid never sits under it */
+    /* no padding-right here; width is reduced via JS so the grid stays centered */
   }
   .gallery .tile{
     border:none; border-radius:0; background:var(--bg);
@@ -167,7 +165,7 @@
     return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
   }
 
-  // Size gallery to visible area AND reserve space for the right menu
+  // Size gallery to visible area; reduce width by menu width + 36 so grid stays centered
   function fit(){
     var vh     = (window.visualViewport && window.visualViewport.height)
                  || window.innerHeight || document.documentElement.clientHeight || 0;
@@ -183,18 +181,17 @@
     // Height between header/footer (no page scroll)
     g.style.height = Math.max(0, vh - headerH - footerH - mainPad) + 'px';
 
-    // Reserve padding for the menu so grid never overlaps it
+    // Compute width reduction for the fixed right menu (+36 breathing room)
     var rightReserve = 0;
     if (menu) {
       var mr = menu.getBoundingClientRect();
-      rightReserve = Math.ceil(mr.width) + 24; // ← was +12; give a smidge more room
+      rightReserve = Math.ceil(mr.width) + 36; // << increased breathing room
     }
-    document.documentElement.style.setProperty('--menu-pad', rightReserve + 'px');
 
-    // Width stays full (minus main’s own 10px side padding); padding-right handles the menu
-    var w = 'calc(100vw - 20px)';
+    // main has 10px left + 10px right padding = 20px
+    var w = 'calc(100vw - ' + (20 + rightReserve) + 'px)';
     g.style.maxWidth = w;
-    g.style.width = w;
+    g.style.width = w;   // with main { place-items:center }, this keeps the grid centered
   }
 
   fit();
@@ -202,13 +199,6 @@
   window.addEventListener('resize', fit);
   window.addEventListener('orientationchange', fit);
   window.addEventListener('pageshow', fit);
-
-  // If the menu size changes (font load/responsive), recompute padding
-  var menu = document.querySelector('.side-links');
-  if (window.ResizeObserver && menu){
-    var ro = new ResizeObserver(fit);
-    ro.observe(menu);
-  }
 
   var y = document.getElementById('y');
   if (y) y.textContent = new Date().getFullYear();
