@@ -26,7 +26,7 @@
 
     --pad: 14px;
 
-    /* NEW: fixed mosaic size */
+    /* fixed mosaic size */
     --rows: 5;
     --mcols: 7;
   }
@@ -44,8 +44,7 @@
 
   header{
     position:relative; height:68px; display:flex; align-items:center;
-    border-bottom:none; /* removed divider */
-    padding-left:20px;
+    border-bottom:none; padding-left:20px;
   }
   .title{font-weight:600; font-size:clamp(18px,3vw,26px);}
 
@@ -59,25 +58,16 @@
 
   main{display:grid; place-items:center; padding:10px; overflow:hidden}
 
-  /* legacy card panel (kept but unused) */
+  /* hide old card panel */
   .center{display:none}
 
-  /* legacy grid/card styles (kept for other pages) */
-  .grid-head{display:flex; align-items:center; justify-content:space-between; font:12px var(--mono); color:var(--muted)}
-  .grid{display:grid; grid-template-columns:repeat(var(--cols),1fr); gap:var(--gap)}
-  .tile{
-    border:1px solid var(--line); border-radius:var(--radius); overflow:hidden;
-    display:grid; grid-template-rows:auto 1fr auto;
-    background:color-mix(in oklab, var(--bg) 98%, transparent);
-  }
-
-  /* ===== NEW: 7×5 image mosaic (borderless, no gaps) ===== */
+  /* 7×5 image mosaic (borderless, no gaps) */
   .gallery{
     width:100%; height:100%;
     display:grid;
     grid-template-columns:repeat(var(--mcols), 1fr);
     grid-template-rows:repeat(var(--rows), 1fr);
-    gap:0; /* no seams between tiles */
+    gap:0;
   }
   .gallery .tile{
     border:none; border-radius:0; background:transparent;
@@ -94,7 +84,7 @@
 
   @media (max-width:980px){ :root{ --cols:3; } }
   @media (max-width:720px){
-    :root{ --cols:2; --center-w:92vw; --center-h:66vh; }
+    :root{ --cols:2; --center-w:92vw; --center-h:66vh;}
   }
 </style>
 </head>
@@ -114,7 +104,6 @@
 </nav>
 
 <main>
-  <!-- NEW: the 7×5 mosaic container -->
   <div class="gallery" id="gallery" aria-label="Gallery"></div>
 </main>
 
@@ -127,17 +116,20 @@
 
   var ROWS = 5, COLS = 7, TOTAL = ROWS * COLS;
 
-  // Build 35 empty tiles (placeholders). To add images later, just
-  // replace a tile's innerHTML with <img src="images/your.jpg" alt="">
-  if (g.children.length === 0){
-    for (var i=0;i<TOTAL;i++){
-      var t = document.createElement('div');
-      t.className = 'tile';
-      g.appendChild(t);
-    }
+  // Build 35 empty tiles
+  for (var i=0;i<TOTAL;i++){
+    var t = document.createElement('div');
+    t.className = 'tile';
+    g.appendChild(t);
   }
 
-  // Size gallery to the visible area and keep it clear of the right menu
+  // ⬇️ ADD ONE IMAGE TO THE FIRST CELL (exact filename + case)
+  var first = g.querySelector('.tile:nth-child(1)');
+  if (first) {
+    first.innerHTML = '<img src="images/FK6A9868.JPG" alt="">';
+  }
+
+  // Size gallery to visible area and keep it clear of the right menu
   function vpad(el){
     var cs = window.getComputedStyle ? getComputedStyle(el) : el.currentStyle;
     return (parseFloat(cs.paddingTop)||0) + (parseFloat(cs.paddingBottom)||0);
@@ -153,10 +145,8 @@
     var footerH = footer ? footer.offsetHeight : 0;
     var mainPad = main ? vpad(main) : 0;
 
-    // height between header and footer (no scroll)
     g.style.height = Math.max(0, vh - headerH - footerH - mainPad) + 'px';
 
-    // keep mosaic from going under the right-side menu
     var rightReserve = 0;
     if (menu) rightReserve = Math.ceil(menu.getBoundingClientRect().width) + 12;
 
@@ -172,7 +162,6 @@
   window.addEventListener('orientationchange', fit);
   window.addEventListener('pageshow', fit);
 
-  // footer year
   var y = document.getElementById('y');
   if (y) y.textContent = new Date().getFullYear();
 })();
