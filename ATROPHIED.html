@@ -25,20 +25,6 @@
     }
     .slider-btn:disabled{ opacity:.35; cursor:default }
     .slider-count{ min-width:64px; text-align:center }
-
-    /* Fixed text block, positioned with JS using same strategy as controls */
-    .involvement {
-      position: fixed;
-      left: 50%;
-      transform: translateX(-50%);
-      text-align: center;
-      z-index: 4;                 /* under controls */
-      pointer-events: none;
-      margin: 0;
-      padding: 0;
-    }
-    .involvement h2 { margin: 0 0 4px; font-weight: 600; }
-    .involvement p  { margin: 0; }
   </style>
 </head>
 <body class="ATROPHIED">
@@ -74,10 +60,11 @@
     g.style.alignItems = 'center';
     g.style.justifyContent = 'center';
 
-    // ---------- IMAGES ----------
+    // ---------- IMAGES (first removed) ----------
     var IMAGES = [
       '/testing-portfolio/images/FK6A9835_VSCO.JPG',
       '/testing-portfolio/images/FK6A9859_VSCO.JPG',
+      '/testing-portfolio/images/FK6A9865_VSCO.JPG',
       '/testing-portfolio/images/FK6A9868.JPG',
       '/testing-portfolio/images/FK6A9881_VSCO.JPG',
       '/testing-portfolio/images/FK6A9964_VSCO.JPG',
@@ -103,12 +90,6 @@
       '<span class="slider-count" id="count">1/' + IMAGES.length + '</span>' +
       '<button class="slider-btn" id="nextBtn" aria-label="Next">&gt;</button>';
     document.body.appendChild(controls);
-
-    // NEW: fixed, centered involvement text block, positioned via JS like controls
-    var involvement = document.createElement('div');
-    involvement.className = 'involvement';
-    involvement.innerHTML = '<h2>Involvement:</h2><p>Concept, subject.</p>';
-    document.body.appendChild(involvement);
 
     var prevBtn = document.getElementById('prevBtn');
     var nextBtn = document.getElementById('nextBtn');
@@ -146,9 +127,6 @@
 
       // Vertically center controls within the gallery area (NOT tied to image size)
       placeControlsVertically();
-
-      // Place involvement text **below the scroller**, midway to gallery bottom
-      placeInvolvementVertically();
     }
 
     function placeControlsVertically(){
@@ -162,26 +140,6 @@
       if (top > maxTop) top = maxTop;
 
       controls.style.top = top + 'px';
-    }
-
-    // Position involvement at the midpoint between the scroller's bottom and the gallery's bottom.
-    // This uses the SAME strategy as the scroller: compute from gallery rect each time.
-    function placeInvolvementVertically(){
-      var gr = g.getBoundingClientRect();
-      var crTop = parseFloat(controls.style.top) || controls.getBoundingClientRect().top;
-      var ch = controls.offsetHeight || 0;
-      var scrollerBottom = crTop + ch;           // bottom of the left scroller block
-      var galleryBottom  = gr.bottom;
-
-      var th = involvement.offsetHeight || 0;
-      var desired = Math.round((scrollerBottom + galleryBottom) / 2 - th / 2); // midway
-
-      // Keep on-screen with a small margin
-      var maxTop = (window.innerHeight || 0) - th - 8;
-      if (desired < 8) desired = 8;
-      if (desired > maxTop) desired = maxTop;
-
-      involvement.style.top = desired + 'px';
     }
 
     function updateButtons(){
