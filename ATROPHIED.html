@@ -26,12 +26,17 @@
     .slider-btn:disabled{ opacity:.35; cursor:default }
     .slider-count{ min-width:64px; text-align:center }
 
-    .involvement-text {
+    /* --- Added: fixed, centered involvement text block --- */
+    .involvement {
+      position: fixed;              /* static in viewport like controls */
+      left: 50%;
+      transform: translateX(-50%);
       text-align: center;
-      position: relative;
-      top: 50%;
-      transform: translateY(-50%);
+      z-index: 4;                   /* under controls but above content */
+      pointer-events: none;         /* purely informational */
     }
+    .involvement h2 { margin: 0 0 4px; font-weight: 600; }
+    .involvement p  { margin: 0; }
   </style>
 </head>
 <body class="ATROPHIED">
@@ -52,11 +57,6 @@
 
   <main>
     <div class="gallery" id="gallery" aria-label="ATROPHIED Gallery"></div>
-
-    <div class="involvement-text">
-      <h2>Involvement:</h2>
-      <p>Concept, subject.</p>
-    </div>
   </main>
 
   <footer>© <span id="y"></span> Ethan</footer>
@@ -102,6 +102,12 @@
       '<button class="slider-btn" id="nextBtn" aria-label="Next">&gt;</button>';
     document.body.appendChild(controls);
 
+    // --- Added: fixed, centered involvement text block (below scroller area) ---
+    var involvement = document.createElement('div');
+    involvement.className = 'involvement';
+    involvement.innerHTML = '<h2>Involvement:</h2><p>Concept, subject.</p>';
+    document.body.appendChild(involvement);
+
     var prevBtn = document.getElementById('prevBtn');
     var nextBtn = document.getElementById('nextBtn');
     var countEl = document.getElementById('count');
@@ -138,6 +144,9 @@
 
       // Vertically center controls within the gallery area (NOT tied to image size)
       placeControlsVertically();
+
+      // Place involvement text at ~75% of gallery height (between center & bottom)
+      placeInvolvementVertically();
     }
 
     function placeControlsVertically(){
@@ -151,6 +160,22 @@
       if (top > maxTop) top = maxTop;
 
       controls.style.top = top + 'px';
+    }
+
+    // --- Added: position involvement text relative to gallery, not the image ---
+    function placeInvolvementVertically(){
+      var gr = g.getBoundingClientRect();
+      var th = involvement.offsetHeight || 0;
+      // 75% down from the top of the gallery places it visually
+      // between the image bottom and the gallery bottom, and it's static.
+      var top = Math.round(gr.top + gr.height * 0.75 - th / 2);
+
+      // Keep on-screen with a small margin
+      var maxTop = (window.innerHeight || 0) - th - 8;
+      if (top < 8) top = 8;
+      if (top > maxTop) top = maxTop;
+
+      involvement.style.top = top + 'px';
     }
 
     function updateButtons(){
