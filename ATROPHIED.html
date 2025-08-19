@@ -25,6 +25,18 @@
     }
     .slider-btn:disabled{ opacity:.35; cursor:default }
     .slider-count{ min-width:64px; text-align:center }
+
+    /* NEW: text block below the scroller, left-aligned with window (same fixed strategy) */
+    .below-scroller{
+      position:fixed;
+      left:16px;                    /* align with page/window left like controls */
+      z-index:4;                    /* under controls */
+      text-align:left;
+      margin:0; padding:0;
+      background:transparent; color:inherit;
+    }
+    .below-scroller h2{ margin:0 0 4px; font-weight:600; }
+    .below-scroller p{ margin:0; }
   </style>
 </head>
 <body class="ATROPHIED">
@@ -32,20 +44,26 @@
     <div class="title">Ethan Granat</div>
   </header>
 
-<!-- Same fixed side links layout -->
-<nav class="side-links" aria-label="Site links">
-  <a href="ATROPHIED.html">ATROPHIED</a>
-  <a href="bonito.html">Bonito</a>
-  <a href="news.html">News</a>
-  <a href="projects.html" aria-current="page">Projects</a>
-  <a href="about.html" style="margin-top:12px">About</a>  <!-- extra gap above -->
-  <a href="blog.html">Blog</a>
-  <a href="contact.html">Contact</a>
-</nav>
+  <!-- Same fixed side links layout -->
+  <nav class="side-links" aria-label="Site links">
+    <a href="ATROPHIED.html">ATROPHIED</a>
+    <a href="bonito.html">Bonito</a>
+    <a href="news.html">News</a>
+    <a href="projects.html" aria-current="page">Projects</a>
+    <a href="about.html" style="margin-top:12px">About</a>  <!-- extra gap above -->
+    <a href="blog.html">Blog</a>
+    <a href="contact.html">Contact</a>
+  </nav>
 
   <main>
     <div class="gallery" id="gallery" aria-label="ATROPHIED Gallery"></div>
   </main>
+
+  <!-- NEW: the text element (positioned via JS just below the scroller) -->
+  <div id="belowText" class="below-scroller" aria-label="Involvement text">
+    <h2>Involvement:</h2>
+    <p>Concept, subject.</p>
+  </div>
 
   <footer>© <span id="y"></span> Ethan</footer>
 
@@ -91,6 +109,8 @@
       '<button class="slider-btn" id="nextBtn" aria-label="Next">&gt;</button>';
     document.body.appendChild(controls);
 
+    var belowText = document.getElementById('belowText');
+
     var prevBtn = document.getElementById('prevBtn');
     var nextBtn = document.getElementById('nextBtn');
     var countEl = document.getElementById('count');
@@ -127,6 +147,9 @@
 
       // Vertically center controls within the gallery area (NOT tied to image size)
       placeControlsVertically();
+
+      // Position the text directly BELOW the scroller, left-aligned with window
+      placeBelowText();
     }
 
     function placeControlsVertically(){
@@ -140,6 +163,23 @@
       if (top > maxTop) top = maxTop;
 
       controls.style.top = top + 'px';
+    }
+
+    // NEW: uses same strategy as controls; anchors just under scroller
+    function placeBelowText(){
+      if (!belowText) return;
+      var cr = controls.getBoundingClientRect();
+      var th = belowText.offsetHeight || 0;
+
+      // 12px below the bottom of the scroller block
+      var top = Math.round(cr.top + cr.height + 12);
+
+      // keep on screen
+      var maxTop = (window.innerHeight || 0) - th - 8;
+      if (top > maxTop) top = maxTop;
+      if (top < 8) top = 8;
+
+      belowText.style.top = top + 'px';
     }
 
     function updateButtons(){
@@ -168,11 +208,11 @@
     fit();
 
     // Keep layout correct on common events
-    window.addEventListener('load', function(){ fit(); });
-    window.addEventListener('resize', function(){ fit(); });
-    window.addEventListener('orientationchange', function(){ fit(); });
-    window.addEventListener('pageshow', function(){ fit(); });
-    img.addEventListener('load', function(){ fit(); });
+    window.addEventListener('load', fit);
+    window.addEventListener('resize', fit);
+    window.addEventListener('orientationchange', fit);
+    window.addEventListener('pageshow', fit);
+    img.addEventListener('load', fit);
 
     // Footer year
     var y = document.getElementById('y');
